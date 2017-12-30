@@ -16,9 +16,10 @@ class TextCMD {
         TextCMD(uint8_t count, cmd_dispatch dispatch[]);
         uint8_t argc = 0;
         String argv[TextCMD_max_argv];
-        void parse_line(String line);
+        void parse_line(const String &line);
+        void set_argv(uint8_t new_argc, String new_argv[]);
         void do_dispatch();
-        void do_dispatch(String line);
+        void do_dispatch(const String &line);
     private:
         uint8_t _dispatch_count = 0;
         cmd_dispatch* _dispatch;

@@ -17,7 +17,7 @@
 #include "RB1WTemp.h"
 #include "TextCMD.h"
 
-const char MAGIC[] = "6temp 0.02\0";
+const char MAGIC[] = "6temp 0.02";
 
 // temperature vars
 #define ONE_WIRE_BUS A1    // data one wire port A1
@@ -32,13 +32,14 @@ uint8_t temp_sensor_current = 0;
 uint8_t temp_sensors_count = 0;
 uint8_t temp_sensors_count_prev = 0;
 
+#define DFT_I2C_ADDR 0x18
 struct sixtemp_config {
     uint8_t i2c_addr;
     uint8_t future_conf[31];
 };
 
 sixtemp_config config = {
-    0x18,    // i2c_addr
+    DFT_I2C_ADDR,    // i2c_addr
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0  // place-holder for future config options
 };
 
@@ -83,16 +84,27 @@ cmd_dispatch commands[] = {
         &cmd_temp
     },
     {
-        "conf",
-        &cmd_conf
+        "info",
+        &cmd_info
+    },
+    {
+        "set",
+        &cmd_set_dispatch
     },
     {
         "tled",
         &cmd_tled
     }
 };
+cmd_dispatch commands_set[] = {
+    {
+        "i2c",
+        &cmd_set_i2c
+    }
+};
 
 TextCMD cmd((sizeof(commands)/sizeof(commands[0])),commands);
+TextCMD cmd_set((sizeof(commands_set)/sizeof(commands_set[0])),commands_set);
 
 void setup () {
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
@@ -111,7 +123,7 @@ void setup () {
     }
 
     if (memcmp(MAGIC,magic,strlen(MAGIC)) == 0) {
-        Serial.println("eeprom magic found");
+        Serial.println(F("eeprom magic found"));
 
         // read config
         for (uint8_t i = 0; i < sizeof(config); i++) {
@@ -127,19 +139,19 @@ void setup () {
         }
     }
     else {
-        Serial.println("eeprom magic missmatch, doing init");
+        Serial.println(F("eeprom magic missmatch, doing init"));
         // after magic, there is MAX_SENSORS of bool has_address and DeviceAddress
         // write magic
         for (uint8_t i=0; i<strlen(MAGIC); i++) {
             EEPROM.write(i,MAGIC[i]);
         }
-        // zero out
-        for (uint8_t i=strlen(MAGIC); i<(strlen(MAGIC)+sizeof(config)+MAX_SENSORS+MAX_SENSORS*sizeof(DeviceAddress)); i++) {
-            EEPROM.write(i,0);
-        }
         // write config
         for (uint8_t i = 0; i < sizeof(config); i++) {
             EEPROM.write(strlen(MAGIC)+i, *((char*)&config+i));
+        }
+        // zero out the rest
+        for (uint8_t i=(strlen(MAGIC)+sizeof(config)); i<(strlen(MAGIC)+sizeof(config)+MAX_SENSORS+MAX_SENSORS*sizeof(DeviceAddress)); i++) {
+            EEPROM.write(i,0);
         }
     }
 
@@ -187,7 +199,7 @@ void loop () {
             continue;
         }
 
-        Serial.println("");
+        Serial.println();
         cmd.do_dispatch(current_line);
         current_line = "";
     }
@@ -214,7 +226,7 @@ void do_test_led() {
         rb1wtemps[i].set_red(0);
         rb1wtemps[i].set_blue(false);
     }
-    Serial.println("fade all in/out red");
+    Serial.println(F("fade all in/out red"));
     for (int r = 0; r < 255; r = r + 8) {
         for (uint8_t i = 0; i < MAX_SENSORS; i++) {
             rb1wtemps[i].set_red(r);
@@ -230,21 +242,23 @@ void do_test_led() {
     }
     delay(500);
 
-    Serial.println("blink red");
+    Serial.println(F("blink red"));
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
         rb1wtemps[i].set_red(255);
-        Serial.println(" red "+String(i+1));
+        Serial.print(F(" red "));
+        Serial.println(i+1);
         delay(500);
         rb1wtemps[i].set_red(false);
         delay(100);
     }
     delay(500);
 
-    Serial.println("LED test.");
-    Serial.println("blink blue");
+    Serial.println(F("LED test."));
+    Serial.println(F("blink blue"));
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
         rb1wtemps[i].set_blue(true);
-        Serial.println(" blue "+String(i+1));
+        Serial.print(F(" blue "));
+        Serial.println(i+1);
         delay(500);
         rb1wtemps[i].set_blue(false);
         delay(100);
@@ -276,7 +290,8 @@ void refresh_one_wire() {
 
         // save and use new found sensor
         if ((sensor_idx == -1) && (free_slot_idx != -1)) {
-            Serial.println("new sensor found, storing at: "+String(free_slot_idx));
+            Serial.print(F("new sensor found, storing at: "));
+            Serial.println(free_slot_idx);
             rb1wtemps[free_slot_idx].set_address(found_sensor);
             uint8_t base = strlen(MAGIC)+sizeof(config)+(1+sizeof(DeviceAddress))*free_slot_idx;
             EEPROM.write(base, 1);
@@ -307,7 +322,9 @@ void cmd_forget(uint8_t argc, String argv[]) {
     rb1wtemps[idx-1].reset_address();
     uint8_t base = strlen(MAGIC)+sizeof(config)+(1+sizeof(DeviceAddress))*(idx-1);
     EEPROM.write(base, 0);
-    Serial.println("temp address "+String(idx)+" forgotten");
+    Serial.print(F("temp address "));
+    Serial.print(idx);
+    Serial.println(F(" forgotten"));
 }
 
 void cmd_tled(uint8_t argc, String argv[]) {
@@ -316,53 +333,118 @@ void cmd_tled(uint8_t argc, String argv[]) {
         loops = argv[1].toInt();
     }
     for (uint8_t i=1; i <= loops; i++) {
-        Serial.println("led testing "+String(i)+"/"+String(loops));
+        Serial.print(F("testing "));
+        Serial.print(i);
+        Serial.print(F("/"));
+        Serial.println(loops);
         do_test_led();
     }
-    delay(3000);
-    Serial.println("done led testing");
+    delay(1000);
 }
 
 void cmd_help(uint8_t argc, String argv[]) {
-    Serial.println("supported commands:");
-    Serial.println("    temp            - show temperatures from all sensors");
-    Serial.println("    forget idx      - forget sensor on position idx");
-    Serial.println("    conf            - show configuration");
-    Serial.println("    tled [num]      - do led blink test num times (1 is default)");
-    Serial.println("    help/?          - print this help");
+    Serial.println(F("supported commands:"));
+    Serial.println(F("  temp            - show temperatures from all sensors"));
+    Serial.println(F("  forget idx      - forget sensor on position idx"));
+    Serial.println(F("  info            - show sram usage and configuration"));
+    Serial.println(F("  set i2c [num]   - set i2c address (0x18 is default)"));
+    Serial.println(F("  tled [num]      - do led blink test num times (1 is default)"));
+    Serial.println(F("  help/?          - print this help"));
 }
 
 void cmd_temp(uint8_t argc, String argv[]) {
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
-        Serial.print("sensor "+String(i+1)+"/"+String(MAX_SENSORS));
+        Serial.print(F("sensor "));
+        Serial.print(i+1);
+        Serial.print(F("/"));
+        Serial.print(MAX_SENSORS);
         if (rb1wtemps[i].has_address) {
-            Serial.print(" [");
+            Serial.print(F(" ["));
             for (uint8_t i2 = 0;i2<8;i2++) {
                 Serial.print(uint8_tToString(rb1wtemps[i].address[i2]));
             }
-            Serial.print("]: ");
+            Serial.print(F("]: "));
             if (rb1wtemps[i].has_error) {
-                Serial.println("ERROR");
+                Serial.println(F("ERROR"));
             }
             else {
-                Serial.println(
-                        String(int(rb1wtemps[i].temp_c))
-                        +"."+String(int(rb1wtemps[i].temp_c*10)-(int(rb1wtemps[i].temp_c)*10))
-                        +" "+char(0xB0)+"C"
-                );
+                Serial.print(int(rb1wtemps[i].temp_c));
+                Serial.print(F("."));
+                Serial.print(int(rb1wtemps[i].temp_c*10)-(int(rb1wtemps[i].temp_c)*10));
+                Serial.print(F(" "));
+                Serial.print(char(0xB0));
+                Serial.println(F("C"));
             }
         }
         else {
-            Serial.println(": n/a");
+            Serial.println(F(": n/a"));
         }
     }
 }
 
-void cmd_conf(uint8_t argc, String argv[]) {
-    Serial.println("current configuration:");
-    Serial.println("    i2c_addr: 0x"+String(config.i2c_addr, HEX));
+void cmd_info(uint8_t argc, String argv[]) {
+    Serial.print(F("sram free: "));
+    Serial.println(freeRam());
+    Serial.println(F("current configuration:"));
+    Serial.print(F("    i2c_addr: 0x"));
+    Serial.println(String(config.i2c_addr, HEX));
+}
+
+void cmd_set_dispatch(uint8_t argc, String argv[]) {
+    if (argc < 2) {
+        return;
+    }
+    cmd_set.set_argv(argc-1, argv+1);
+    cmd_set.do_dispatch();
+}
+
+void cmd_set_i2c(uint8_t argc, String argv[]) {
+    uint32_t new_i2c_addr = DFT_I2C_ADDR;
+    if (argc > 1) {
+        if (argv[1].startsWith("0x")) {
+            new_i2c_addr = 0;
+            for (uint8_t i = 2; i < argv[1].length(); i++) {
+                new_i2c_addr = new_i2c_addr*0x10 + hex_char_to_int(argv[1].charAt(i));
+            }
+        }
+        else {
+            new_i2c_addr = argv[1].toInt();
+        }
+    }
+    if ((new_i2c_addr < 0x0E) || (new_i2c_addr > 0x7F)) {
+        Serial.print(F("i2c address 0x"));
+        Serial.print(String(new_i2c_addr, HEX));
+        Serial.println(F(" invalid, must be greater then 0x0E and smaller then 0x7F"));
+        return;
+    }
+    Serial.print(F("setting i2c address to: 0x"));
+    Serial.println(String(new_i2c_addr, HEX));
+    if (config.i2c_addr != new_i2c_addr) {
+        config.i2c_addr = new_i2c_addr;
+        EEPROM.write(strlen(MAGIC)+0, config.i2c_addr);
+        Wire.begin(config.i2c_addr);
+    }
 }
 
 void i2c_request() {
     Wire.write("x");
+}
+
+int freeRam () {
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
+
+uint8_t hex_char_to_int(char digit_char) {
+    if ((digit_char >= '0') && (digit_char <= '9')) {
+        return digit_char - '0';
+    }
+    if ((digit_char >= 'a') && (digit_char <= 'f')) {
+        return 10+(digit_char - 'a');
+    }
+    if ((digit_char >= 'A') && (digit_char <= 'F')) {
+        return 10+(digit_char - 'A');
+    }
+    return 0;
 }

@@ -8,7 +8,7 @@ TextCMD::TextCMD(uint8_t count, cmd_dispatch dispatch[]) {
     _dispatch_count = count;
 }
 
-void TextCMD::do_dispatch(String line) {
+void TextCMD::do_dispatch(const String &line) {
     parse_line(line);
     do_dispatch();
 }
@@ -25,7 +25,14 @@ void TextCMD::do_dispatch() {
     }
 }
 
-void TextCMD::parse_line(String line) {
+void TextCMD::set_argv(uint8_t new_argc, String new_argv[]) {
+    argc = new_argc;
+    for (int i = 0; i<argc; i++) {
+        argv[i] = new_argv[i];
+    }
+}
+
+void TextCMD::parse_line(const String &line) {
     argc = 0;
     argv[0] = "";
 
