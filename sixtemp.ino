@@ -4,6 +4,9 @@
 
   Created by Jozef Kutej, 22 December 2017.
   Released into the public domain.
+
+  I2C address defaults to 0x18
+
 */
 
 #include <Arduino.h>
@@ -14,7 +17,7 @@
 #include "RB1WTemp.h"
 #include "TextCMD.h"
 
-const char MAGIC[] = "6temp 0.01\0";
+const char MAGIC[] = "6temp 0.02\0";
 
 // temperature vars
 #define ONE_WIRE_BUS A1    // data one wire port A1
@@ -28,6 +31,17 @@ float max_temp;
 uint8_t temp_sensor_current = 0;
 uint8_t temp_sensors_count = 0;
 uint8_t temp_sensors_count_prev = 0;
+
+struct sixtemp_config {
+    uint8_t i2c_addr;
+    uint8_t future_conf[31];
+};
+
+sixtemp_config config = {
+    0x18,    // i2c_addr
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0  // place-holder for future config options
+};
+
 
 DeviceAddress temp_sensors[MAX_SENSORS];
 
@@ -69,6 +83,10 @@ cmd_dispatch commands[] = {
         &cmd_temp
     },
     {
+        "conf",
+        &cmd_conf
+    },
+    {
         "tled",
         &cmd_tled
     }
@@ -94,9 +112,14 @@ void setup () {
 
     if (memcmp(MAGIC,magic,strlen(MAGIC)) == 0) {
         Serial.println("eeprom magic found");
+
+        // read config
+        for (uint8_t i = 0; i < sizeof(config); i++) {
+            *((char*)&config+i) = EEPROM.read(strlen(MAGIC)+i);
+        }
         // read sensors addresses
         for (uint8_t i = 0; i < MAX_SENSORS; i++) {
-            uint8_t base = strlen(MAGIC)+(1+sizeof(DeviceAddress))*i;
+            uint8_t base = strlen(MAGIC)+sizeof(config)+(1+sizeof(DeviceAddress))*i;
             rb1wtemps[i].has_address = EEPROM.read(base);
             for (uint8_t si = 0; si < sizeof(DeviceAddress); si++) {
                 rb1wtemps[i].address[si] = EEPROM.read(base+1+si);
@@ -111,10 +134,17 @@ void setup () {
             EEPROM.write(i,MAGIC[i]);
         }
         // zero out
-        for (uint8_t i=strlen(MAGIC); i<(strlen(MAGIC)+MAX_SENSORS+MAX_SENSORS*sizeof(DeviceAddress)); i++) {
+        for (uint8_t i=strlen(MAGIC); i<(strlen(MAGIC)+sizeof(config)+MAX_SENSORS+MAX_SENSORS*sizeof(DeviceAddress)); i++) {
             EEPROM.write(i,0);
         }
+        // write config
+        for (uint8_t i = 0; i < sizeof(config); i++) {
+            EEPROM.write(strlen(MAGIC)+i, *((char*)&config+i));
+        }
     }
+
+    Wire.begin(config.i2c_addr);
+    Wire.onRequest(i2c_request);
 }
 
 uint8_t blink_idx = 0;
@@ -248,7 +278,7 @@ void refresh_one_wire() {
         if ((sensor_idx == -1) && (free_slot_idx != -1)) {
             Serial.println("new sensor found, storing at: "+String(free_slot_idx));
             rb1wtemps[free_slot_idx].set_address(found_sensor);
-            uint8_t base = strlen(MAGIC)+(1+sizeof(DeviceAddress))*free_slot_idx;
+            uint8_t base = strlen(MAGIC)+sizeof(config)+(1+sizeof(DeviceAddress))*free_slot_idx;
             EEPROM.write(base, 1);
             for (uint8_t si = 0; si < sizeof(DeviceAddress); si++) {
                 EEPROM.write(base+si+1, rb1wtemps[free_slot_idx].address[si]);
@@ -275,7 +305,7 @@ void cmd_forget(uint8_t argc, String argv[]) {
         return;
     }
     rb1wtemps[idx-1].reset_address();
-    uint8_t base = strlen(MAGIC)+(1+sizeof(DeviceAddress))*(idx-1);
+    uint8_t base = strlen(MAGIC)+sizeof(config)+(1+sizeof(DeviceAddress))*(idx-1);
     EEPROM.write(base, 0);
     Serial.println("temp address "+String(idx)+" forgotten");
 }
@@ -297,6 +327,7 @@ void cmd_help(uint8_t argc, String argv[]) {
     Serial.println("supported commands:");
     Serial.println("    temp            - show temperatures from all sensors");
     Serial.println("    forget idx      - forget sensor on position idx");
+    Serial.println("    conf            - show configuration");
     Serial.println("    tled [num]      - do led blink test num times (1 is default)");
     Serial.println("    help/?          - print this help");
 }
@@ -325,4 +356,13 @@ void cmd_temp(uint8_t argc, String argv[]) {
             Serial.println(": n/a");
         }
     }
+}
+
+void cmd_conf(uint8_t argc, String argv[]) {
+    Serial.println("current configuration:");
+    Serial.println("    i2c_addr: 0x"+String(config.i2c_addr, HEX));
+}
+
+void i2c_request() {
+    Wire.write("x");
 }
