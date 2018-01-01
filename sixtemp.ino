@@ -5,7 +5,15 @@
   Created by Jozef Kutej, 22 December 2017.
   Released into the public domain.
 
-  I2C address defaults to 0x18
+  I2C address defaults to 0x18, send one byte to set read address register, one of:
+        0x60        read 1 byte with number of sensors
+        0x61..0x66  read 14 bytes of sensor 1..6 data:
+                        struct sixtemp_sensor {
+                            bool has_error;
+                            bool has_address;
+                            float temp_c;
+                            char address[8];
+                        };
 
 */
 
@@ -37,12 +45,14 @@ struct sixtemp_config {
     uint8_t i2c_addr;
     uint8_t future_conf[31];
 };
+uint8_t i2c_register = 0;
 
 sixtemp_config config = {
     DFT_I2C_ADDR,    // i2c_addr
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0  // place-holder for future config options
 };
 
+char to_send_reg0[2+sizeof(float)+sizeof(DeviceAddress)];
 
 DeviceAddress temp_sensors[MAX_SENSORS];
 
@@ -123,7 +133,8 @@ void setup () {
     }
 
     if (memcmp(MAGIC,magic,strlen(MAGIC)) == 0) {
-        Serial.println(F("eeprom magic found"));
+        Serial.print(F("eeprom magic found: "));
+        Serial.println(MAGIC);
 
         // read config
         for (uint8_t i = 0; i < sizeof(config); i++) {
@@ -157,6 +168,7 @@ void setup () {
 
     Wire.begin(config.i2c_addr);
     Wire.onRequest(i2c_request);
+    Wire.onReceive(i2c_receive);
 }
 
 uint8_t blink_idx = 0;
@@ -343,6 +355,7 @@ void cmd_tled(uint8_t argc, String argv[]) {
 }
 
 void cmd_help(uint8_t argc, String argv[]) {
+    Serial.println(MAGIC);
     Serial.println(F("supported commands:"));
     Serial.println(F("  temp            - show temperatures from all sensors"));
     Serial.println(F("  forget idx      - forget sensor on position idx"));
@@ -383,6 +396,7 @@ void cmd_temp(uint8_t argc, String argv[]) {
 }
 
 void cmd_info(uint8_t argc, String argv[]) {
+    Serial.println(MAGIC);
     Serial.print(F("sram free: "));
     Serial.println(freeRam());
     Serial.println(F("current configuration:"));
@@ -427,7 +441,34 @@ void cmd_set_i2c(uint8_t argc, String argv[]) {
 }
 
 void i2c_request() {
-    Wire.write("x");
+    if (i2c_register == 0x60) {
+        Wire.write(MAX_SENSORS);
+    }
+    else if ((i2c_register >= 0x60+1) && (i2c_register <= 0x60+MAX_SENSORS)) {
+        uint8_t idx = i2c_register - 0x60 - 1;
+        to_send_reg0[0] = rb1wtemps[idx].has_error;
+        to_send_reg0[1] = rb1wtemps[idx].has_address;
+        memcpy(
+            &to_send_reg0[2],
+            &rb1wtemps[idx].temp_c,
+            sizeof(float)
+        );
+        memcpy(
+            &to_send_reg0[2+sizeof(float)],
+            &rb1wtemps[idx].address,
+            sizeof(rb1wtemps[idx].address)
+        );
+        Wire.write((uint8_t*)to_send_reg0, sizeof(to_send_reg0));
+    }
+    else {
+        Wire.write(0xff);
+    }
+}
+
+void i2c_receive(int num_bytes) {
+    while (Wire.available()) {
+        i2c_register = Wire.read();
+    }
 }
 
 int freeRam () {
