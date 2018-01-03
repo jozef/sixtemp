@@ -8,8 +8,8 @@ TextCMD::TextCMD(uint8_t count, cmd_dispatch dispatch[]) {
     _dispatch_count = count;
 }
 
-void TextCMD::do_dispatch(const String &line) {
-    parse_line(line);
+void TextCMD::do_dispatch(char* line) {
+    split_line_to_argv(line);
     do_dispatch();
 }
 
@@ -18,46 +18,38 @@ void TextCMD::do_dispatch() {
         return;
     }
     for (uint8_t i = 0; i < _dispatch_count; i++) {
-        if (_dispatch[i].cmd == argv[0]) {
-            _dispatch[i].cb(argc,&argv[0]);
+        if (strcmp(_dispatch[i].cmd, argv[0]) == 0) {
+            _dispatch[i].cb(argc,argv);
             break;
         }
     }
 }
 
-void TextCMD::set_argv(uint8_t new_argc, String new_argv[]) {
+void TextCMD::set_argv(uint8_t new_argc, char* new_argv[]) {
     argc = new_argc;
-    for (int i = 0; i<argc; i++) {
+    for (uint8_t i = 0; i < argc; i++) {
         argv[i] = new_argv[i];
     }
 }
 
-void TextCMD::parse_line(const String &line) {
+void TextCMD::split_line_to_argv(char* line) {
     argc = 0;
-    argv[0] = "";
-
     bool new_arg = true;
-    int start_ch = 0;
-    for (int i = 0; i<line.length(); i++) {
-        char ch = line[i];
-        if (ch == ' ') {
-            if (new_arg) {
-                continue;
-            }
-
-            argc++;
+    int line_len = strlen(line);
+    for (int i = 0; i< line_len; i++) {
+        if (line[i] == ' ') {
             new_arg = true;
-            if (argc == TextCMD_max_argv) {
-                break;
-            }
-            argv[argc] = "";
+            line[i] = '\0';
             continue;
         }
-        new_arg = false;
-        argv[argc] += ch;
-    }
-    if (!new_arg) {
-        argc++;
+        if (new_arg) {
+            if (argc+1 == TextCMD_max_argv) {
+                break;
+            }
+            argv[argc] = &line[i];
+            argc++;
+            new_arg = false;
+        }
     }
 }
 

@@ -7,19 +7,20 @@
 const uint8_t TextCMD_max_argv = 10;
 
 struct cmd_dispatch {
-    String cmd;
-    void (*cb)(uint8_t argc, String argv[]);
+    char* cmd;
+    void (*cb)(uint8_t argc, char* argv[]);
 };
 
 class TextCMD {
     public:
         TextCMD(uint8_t count, cmd_dispatch dispatch[]);
         uint8_t argc = 0;
-        String argv[TextCMD_max_argv];
-        void parse_line(const String &line);
-        void set_argv(uint8_t new_argc, String new_argv[]);
+        char* argv[TextCMD_max_argv];
+        void split_line_to_argv(char* line);
+        void set_argv(uint8_t new_argc, char* new_argv[]);
         void do_dispatch();
-        void do_dispatch(const String &line);
+        void do_dispatch(char* line);
+        // int argv_to_int(uint8_t idx);    # TODO parse argv[idx-1] and return integer of that argument
     private:
         uint8_t _dispatch_count = 0;
         cmd_dispatch* _dispatch;
@@ -69,6 +70,10 @@ class TextCMD {
 
 Helps to read text lines and decode them into arguments and call corresponsing
 function.
+
+NOTE to save on memory, split_line_to_argv(char* line) and do_dispatch(char* line)
+will modify the original line, by switching spaces to \0. argv pointer array will
+be set to those line chunks
 
 =head1 LICENSE
 

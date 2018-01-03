@@ -56,7 +56,9 @@ char to_send_reg0[2+sizeof(float)+sizeof(DeviceAddress)];
 
 DeviceAddress temp_sensors[MAX_SENSORS];
 
-String current_line = "";
+#define MAX_CMD_LINE 0x1F
+uint8_t current_line_end = 0;
+char current_line[MAX_CMD_LINE+1];
 
 struct ntemp_pin {
     uint8_t red;
@@ -202,18 +204,20 @@ void loop () {
         char ch = Serial.read();
         if (ch == '\r') {
         }
-        else if (ch != '\n') {
-            current_line += ch;
+        else if ((ch != '\n') && (current_line_end < MAX_CMD_LINE)) {
+            current_line[current_line_end++] = ch;
+            current_line[current_line_end] = '\0';
             Serial.print(ch);
             continue;
         }
-        if (current_line.length() == 0) {
+        if (current_line_end == 0) {
             continue;
         }
 
         Serial.println();
         cmd.do_dispatch(current_line);
-        current_line = "";
+        current_line[0] = '\0';
+        current_line_end = 0;
     }
 }
 
@@ -323,11 +327,11 @@ String uint8_tToString (uint8_t num) {
     }
 }
 
-void cmd_forget(uint8_t argc, String argv[]) {
+void cmd_forget(uint8_t argc, char* argv[]) {
     if (argc < 2) {
         return;
     }
-    uint8_t idx = argv[1].toInt();
+    uint8_t idx = String(argv[1]).toInt();
     if (!idx || (idx > MAX_SENSORS)) {
         return;
     }
@@ -339,10 +343,10 @@ void cmd_forget(uint8_t argc, String argv[]) {
     Serial.println(F(" forgotten"));
 }
 
-void cmd_tled(uint8_t argc, String argv[]) {
+void cmd_tled(uint8_t argc, char* argv[]) {
     uint8_t loops = 1;
     if (argc > 1) {
-        loops = argv[1].toInt();
+        loops = String(argv[1]).toInt();
     }
     for (uint8_t i=1; i <= loops; i++) {
         Serial.print(F("testing "));
@@ -354,7 +358,7 @@ void cmd_tled(uint8_t argc, String argv[]) {
     delay(1000);
 }
 
-void cmd_help(uint8_t argc, String argv[]) {
+void cmd_help(uint8_t argc, char* argv[]) {
     Serial.println(MAGIC);
     Serial.println(F("supported commands:"));
     Serial.println(F("  temp            - show temperatures from all sensors"));
@@ -365,7 +369,7 @@ void cmd_help(uint8_t argc, String argv[]) {
     Serial.println(F("  help/?          - print this help"));
 }
 
-void cmd_temp(uint8_t argc, String argv[]) {
+void cmd_temp(uint8_t argc, char* argv[]) {
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
         Serial.print(F("sensor "));
         Serial.print(i+1);
@@ -395,7 +399,7 @@ void cmd_temp(uint8_t argc, String argv[]) {
     }
 }
 
-void cmd_info(uint8_t argc, String argv[]) {
+void cmd_info(uint8_t argc, char* argv[]) {
     Serial.println(MAGIC);
     Serial.print(F("sram free: "));
     Serial.println(freeRam());
@@ -404,7 +408,7 @@ void cmd_info(uint8_t argc, String argv[]) {
     Serial.println(String(config.i2c_addr, HEX));
 }
 
-void cmd_set_dispatch(uint8_t argc, String argv[]) {
+void cmd_set_dispatch(uint8_t argc, char* argv[]) {
     if (argc < 2) {
         return;
     }
@@ -412,17 +416,17 @@ void cmd_set_dispatch(uint8_t argc, String argv[]) {
     cmd_set.do_dispatch();
 }
 
-void cmd_set_i2c(uint8_t argc, String argv[]) {
+void cmd_set_i2c(uint8_t argc, char* argv[]) {
     uint32_t new_i2c_addr = DFT_I2C_ADDR;
     if (argc > 1) {
-        if (argv[1].startsWith("0x")) {
+        if ((argv[1][0] == '0') && (argv[1][1] == 'x')) {
             new_i2c_addr = 0;
-            for (uint8_t i = 2; i < argv[1].length(); i++) {
-                new_i2c_addr = new_i2c_addr*0x10 + hex_char_to_int(argv[1].charAt(i));
+            for (uint8_t i = 2; i < strlen(argv[1]); i++) {
+                new_i2c_addr = new_i2c_addr*0x10 + hex_char_to_int(argv[1][i]);
             }
         }
         else {
-            new_i2c_addr = argv[1].toInt();
+            new_i2c_addr = String(argv[1]).toInt();
         }
     }
     if ((new_i2c_addr < 0x0E) || (new_i2c_addr > 0x7F)) {
