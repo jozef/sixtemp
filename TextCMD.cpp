@@ -36,7 +36,24 @@ void TextCMD::split_line_to_argv(char* line) {
     argc = 0;
     bool new_arg = true;
     int line_len = strlen(line);
-    for (int i = 0; i< line_len; i++) {
+    uint8_t args_start = 0;
+
+    // cmds with spaces inside as argv[0]
+    for (uint8_t i = 0; i < _dispatch_count; i++) {
+        uint8_t cmd_len = strlen(_dispatch[i].cmd);
+        if (
+            (strncmp(line,_dispatch[i].cmd,cmd_len) == 0)
+            && ((line[cmd_len] == ' ') || (line[cmd_len] == '\0'))
+        ) {
+            line[cmd_len] = '\0';
+            argv[0] = &line[0];
+            argc = 1;
+            args_start = cmd_len + 1;
+            break;
+        }
+    }
+
+    for (int i = args_start; i < line_len; i++) {
         if (line[i] == ' ') {
             new_arg = true;
             line[i] = '\0';

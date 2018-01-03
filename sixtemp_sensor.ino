@@ -100,23 +100,16 @@ cmd_dispatch commands[] = {
         &cmd_info
     },
     {
-        "set",
-        &cmd_set_dispatch
+        "set i2c",
+        &cmd_set_i2c
     },
     {
         "tled",
         &cmd_tled
     }
 };
-cmd_dispatch commands_set[] = {
-    {
-        "i2c",
-        &cmd_set_i2c
-    }
-};
 
 TextCMD cmd((sizeof(commands)/sizeof(commands[0])),commands);
-TextCMD cmd_set((sizeof(commands_set)/sizeof(commands_set[0])),commands_set);
 
 void setup () {
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
@@ -406,14 +399,6 @@ void cmd_info(uint8_t argc, char* argv[]) {
     Serial.println(F("current configuration:"));
     Serial.print(F("    i2c_addr: 0x"));
     Serial.println(String(config.i2c_addr, HEX));
-}
-
-void cmd_set_dispatch(uint8_t argc, char* argv[]) {
-    if (argc < 2) {
-        return;
-    }
-    cmd_set.set_argv(argc-1, argv+1);
-    cmd_set.do_dispatch();
 }
 
 void cmd_set_i2c(uint8_t argc, char* argv[]) {
