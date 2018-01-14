@@ -1,6 +1,6 @@
 /*
-  sixtemp.ino - read up to six temperature sensors using Arduino
-                and show their status using RGB led
+  sixtemp_sensor.ino - read up to six temperature sensors using Arduino
+                       and show their status using RGB led
 
   Created by Jozef Kutej, 22 December 2017.
   Released into the public domain.
@@ -399,6 +399,8 @@ void cmd_info(uint8_t argc, char* argv[]) {
     Serial.println(F("current configuration:"));
     Serial.print(F("    i2c_addr: 0x"));
     Serial.println(String(config.i2c_addr, HEX));
+    Serial.print(F("    i2c_register: 0x"));
+    Serial.println(String(i2c_register, HEX));
 }
 
 void cmd_set_i2c(uint8_t argc, char* argv[]) {
@@ -455,7 +457,7 @@ void i2c_request() {
 }
 
 void i2c_receive(int num_bytes) {
-    while (Wire.available()) {
+    while (num_bytes--) {
         i2c_register = Wire.read();
     }
 }
