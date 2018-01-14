@@ -1,20 +1,7 @@
 /*
-  sixtemp_sensor.ino - read up to six temperature sensors using Arduino
-                       and show their status using RGB led
-
-  Created by Jozef Kutej, 22 December 2017.
-  Released into the public domain.
-
-  I2C address defaults to 0x18, send one byte to set read address register, one of:
-        0x60        read 1 byte with number of sensors
-        0x61..0x66  read 14 bytes of sensor 1..6 data:
-                        struct sixtemp_sensor {
-                            bool has_error;
-                            bool has_address;
-                            float temp_c;
-                            char address[8];
-                        };
-
+  sixtemp_sensor.ino - read up to six 1-wire temperature sensors using Arduino
+                       and show their status using R(G)B led
+  (see below for documentation)
 */
 
 #include <Arduino.h>
@@ -160,6 +147,7 @@ void setup () {
             EEPROM.write(i,0);
         }
     }
+    Serial.print(F("> "));
 
     Wire.begin(config.i2c_addr);
     Wire.onRequest(i2c_request);
@@ -209,6 +197,8 @@ void loop () {
 
         Serial.println();
         cmd.do_dispatch(current_line);
+        Serial.println();
+        Serial.print(F("> "));
         current_line[0] = '\0';
         current_line_end = 0;
     }
@@ -382,7 +372,6 @@ void cmd_temp(uint8_t argc, char* argv[]) {
                 Serial.print(F("."));
                 Serial.print(int(rb1wtemps[i].temp_c*10)-(int(rb1wtemps[i].temp_c)*10));
                 Serial.print(F(" "));
-                Serial.print(char(0xB0));
                 Serial.println(F("C"));
             }
         }
@@ -480,3 +469,163 @@ uint8_t hex_char_to_int(char digit_char) {
     }
     return 0;
 }
+
+/*
+
+=head1 NAME
+
+sixtemp_sensor.ino - read up to six 1-wire temperature sensors using Arduino and show their status using R(G)B led
+
+=head1 SYNOPSIS
+
+See L<https://github.com/jozef/sixtemp_i2c> for example and usage.
+
+=head1 DESCRIPTION
+
+Arduino based sensor that can read up to six 1-wire DS18B20 temperatures.
+Temperature sensors addresses are permanently stored in eeprom so that
+same positions are assigned between power-cycles. It provides the
+temperature readings via I2C interface and it also shows the temperature
+using 6xred-blue leds.
+
+It's work-in-progress -> will provide more description & images later on.
+
+=head1 I2C CLIENT
+
+Connected to I2C, by default, responds on 0x18 address.
+
+First I2C master has to send one byte which is the read address. Addresses are:
+
+    0x60        read 1 byte with number of sensors
+    0x61..0x66  read 14 bytes of sensor 1..6 data:
+                    struct sixtemp_sensor {
+                        bool has_error;
+                        bool has_address;
+                        float temp_c;
+                        char address[8];
+                    };
+
+=head1 SERIAL INTERFACE
+
+Using Arduino serial port:
+
+    $ minicom --device /dev/ttyUSB1
+    eeprom magic found: 6temp 0.02
+
+^^^ start-up message in case if sensors and configuration was read
+successfully from eeprom.
+
+=head2 help/?
+
+Prints version and available commands:
+
+    > ?
+    6temp 0.02
+    supported commands:
+      temp            - show temperatures from all sensors
+      forget idx      - forget sensor on position idx
+      info            - show sram usage and configuration
+      set i2c [num]   - set i2c address (0x18 is default)
+      tled [num]      - do led blink test num times (1 is default)
+      help/?          - print this help
+
+=head2 info
+
+Prints version and debug/info:
+
+    > info
+    6temp 0.02
+    sram free: 1158
+    current configuration:
+        i2c_addr: 0x18
+        i2c_register: 0x0
+
+=head2 temp
+
+Prints all available temparature sensor readings:
+
+    > temp
+    sensor 1/6 [286164122f910528]: ERROR
+    sensor 2/6 [28ff3ff6a1160322]: 22.0 C
+    sensor 3/6 [286164122e7c499a]: 24.0 C
+    sensor 4/6 [286164122f88f163]: 24.0 C
+    sensor 5/6 [28ffa59492160558]: ERROR
+    sensor 6/6 [286164122f89682a]: 24.0 C
+
+=head2 forget
+
+Forget one temperature sensor:
+
+    > forget 1
+    temp address 1 forgotten
+
+    > temp
+    sensor 1/6: n/a
+    sensor 2/6 [28ff3ff6a1160322]: 22.0 C
+    sensor 3/6 [286164122e7c499a]: 24.0 C
+    sensor 4/6 [286164122f88f163]: 24.0 C
+    sensor 5/6 [28ffa59492160558]: ERROR
+    sensor 6/6 [286164122f89682a]: 24.0 C
+
+head2 set i2c
+
+Change I2C client address:
+
+    > set i2c 0x20
+    setting i2c address to: 0x20
+
+    > info
+    6temp 0.02
+    sram free: 1158
+    current configuration:
+        i2c_addr: 0x20
+        i2c_register: 0x0
+
+    > set i2c
+    setting i2c address to: 0x18
+
+=head2 tled
+
+Will fade-in/out red leds and sequentially (1 to 6) blink with both red/blue
+leds to test if all are wired correctly:
+
+    > tled 2
+    testing 1/2
+    fade all in/out red
+    blink red
+     red 1
+     red 2
+     red 3
+     red 4
+     red 5
+     red 6
+    LED test.
+    blink blue
+     blue 1
+     blue 2
+     blue 3
+     blue 4
+     blue 5
+     blue 6
+    testing 2/2
+    ...
+
+=head1 INSTALL
+
+Clone the repository folder into F<sketchbook/sixtemp_sensor> and upload to Arduino.
+
+=head1 SEE ALSO
+
+L<https://github.com/jozef/sixtemp_i2c>
+
+=head1 LICENSE
+
+This is free software, licensed under the MIT License.
+
+=head1 AUTHOR
+
+    Jozef Kutej
+
+=cut
+
+*/
