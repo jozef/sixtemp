@@ -41,7 +41,10 @@ void RB1WTemp::refresh(unsigned long tick) {
     }
 
     // blue
-    if (temp_c < 10) {
+    if (!led_on) {
+        digitalWrite(_blue_pin, 0);
+    }
+    else if (temp_c < 10) {
         if (tick % 2 == 0) {
             digitalWrite(_blue_pin, 0);
         }
@@ -56,7 +59,10 @@ void RB1WTemp::refresh(unsigned long tick) {
         digitalWrite(_blue_pin, 0);
     }
     // red
-    if (temp_c > 90) {
+    if (!led_on) {
+        digitalWrite(_red_pin, 0);
+    }
+    else if (temp_c > 90) {
         if (tick % 2 == 0) {
             digitalWrite(_red_pin, 0);
         }

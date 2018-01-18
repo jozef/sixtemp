@@ -30,13 +30,15 @@ uint8_t temp_sensors_count_prev = 0;
 #define DFT_I2C_ADDR 0x18
 struct sixtemp_config {
     uint8_t i2c_addr;
-    uint8_t future_conf[31];
+    bool led_on;
+    uint8_t future_conf[30];
 };
 uint8_t i2c_register = 0;
 
 sixtemp_config config = {
     DFT_I2C_ADDR,    // i2c_addr
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0  // place-holder for future config options
+    true,            // led_on
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0  // place-holder for future config options
 };
 
 char to_send_reg0[2+sizeof(float)+sizeof(DeviceAddress)];
@@ -89,6 +91,10 @@ cmd_dispatch commands[] = {
     {
         "set i2c",
         &cmd_set_i2c
+    },
+    {
+        "led",
+        &cmd_led
     },
     {
         "tled",
@@ -176,6 +182,7 @@ void loop () {
 
     // update temperatures
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
+        rb1wtemps[i].led_on = config.led_on;
         rb1wtemps[i].refresh(tick);
     }
 
@@ -291,6 +298,7 @@ void refresh_one_wire() {
         if ((sensor_idx == -1) && (free_slot_idx != -1)) {
             Serial.print(F("new sensor found, storing at: "));
             Serial.println(free_slot_idx);
+            Serial.println(F("> "));
             rb1wtemps[free_slot_idx].set_address(found_sensor);
             uint8_t base = strlen(MAGIC)+sizeof(config)+(1+sizeof(DeviceAddress))*free_slot_idx;
             EEPROM.write(base, 1);
@@ -341,11 +349,36 @@ void cmd_tled(uint8_t argc, char* argv[]) {
     delay(1000);
 }
 
+void cmd_led(uint8_t argc, char* argv[]) {
+    if (argc < 2) {
+        return;
+    }
+    if (strcmp(argv[1],"on")) {
+        config.led_on = false;
+    }
+    else if (strcmp(argv[1],"off")) {
+        config.led_on = true;
+    }
+
+    uint8_t base = strlen(MAGIC)+1;
+    if (EEPROM.read(base) != config.led_on) {
+        EEPROM.write(base, config.led_on);
+        Serial.print(F("led set to "));
+        if (config.led_on) {
+            Serial.println(F("on"));
+        }
+        else {
+            Serial.println(F("off"));
+        }
+    }
+}
+
 void cmd_help(uint8_t argc, char* argv[]) {
     Serial.println(MAGIC);
     Serial.println(F("supported commands:"));
     Serial.println(F("  temp            - show temperatures from all sensors"));
     Serial.println(F("  forget idx      - forget sensor on position idx"));
+    Serial.println(F("  led on/off      - turn all led temperature indication on or off"));
     Serial.println(F("  info            - show sram usage and configuration"));
     Serial.println(F("  set i2c [num]   - set i2c address (0x18 is default)"));
     Serial.println(F("  tled [num]      - do led blink test num times (1 is default)"));
@@ -390,6 +423,9 @@ void cmd_info(uint8_t argc, char* argv[]) {
     Serial.println(String(config.i2c_addr, HEX));
     Serial.print(F("    i2c_register: 0x"));
     Serial.println(String(i2c_register, HEX));
+    if (!config.led_on) {
+        Serial.println(F("    led indication: off"));
+    }
 }
 
 void cmd_set_i2c(uint8_t argc, char* argv[]) {
@@ -617,6 +653,11 @@ Clone the repository folder into F<sketchbook/sixtemp_sensor> and upload to Ardu
 =head1 SEE ALSO
 
 L<https://github.com/jozef/sixtemp_i2c>
+
+=head1 TODO
+
+    - info show uptime
+    - info show number of errors per sensor
 
 =head1 LICENSE
 
