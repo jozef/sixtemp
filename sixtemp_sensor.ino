@@ -460,6 +460,9 @@ void i2c_request() {
     if (i2c_register == 0x60) {
         Wire.write(MAX_SENSORS);
     }
+    else if (i2c_register == 0x01) {
+        Wire.write(config.led_on);
+    }
     else if ((i2c_register >= 0x60+1) && (i2c_register <= 0x60+MAX_SENSORS)) {
         uint8_t idx = i2c_register - 0x60 - 1;
         to_send_reg0[0] = rb1wtemps[idx].has_error;
@@ -483,6 +486,10 @@ void i2c_request() {
 
 void i2c_receive(int num_bytes) {
     while (num_bytes--) {
+        if (i2c_register == 0x21) {
+            config.led_on = Wire.read();
+            i2c_register = 0x01;
+        }
         i2c_register = Wire.read();
     }
 }
@@ -530,8 +537,10 @@ It's work-in-progress -> will provide more description & images later on.
 
 Connected to I2C, by default, responds on 0x18 address.
 
-First I2C master has to send one byte which is the read address. Addresses are:
+First I2C master has to send one byte which is the read/write address. Addresses are:
 
+    0x01        led on/off bool flag
+    0x21        set led on/off flag. second byte is flag value
     0x60        read 1 byte with number of sensors
     0x61..0x66  read 14 bytes of sensor 1..6 data:
                     struct sixtemp_sensor {
