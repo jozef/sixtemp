@@ -9,6 +9,7 @@
 #include <OneWire.h>
 #include <EEPROM.h>
 #include <DallasTemperature.h>
+#include <UpTime.h>             // https://github.com/jozef/Arduino-Uptime
 #include "RB1WTemp.h"
 #include "TextCMD.h"
 
@@ -18,11 +19,12 @@ const char MAGIC[] = "6temp 0.02";
 #define ONE_WIRE_BUS A1    // data one wire port A1
 #define TEMPERATURE_PRECISION 12
 #define MAX_SENSORS 6
+const bool non_verbose = false;
+const bool be_verbose = true;
+const bool update_temp_leds = false;
+const bool update_leds_only = true;
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-float cur_temp;
-float min_temp = -127;
-float max_temp;
 uint8_t temp_sensor_current = 0;
 uint8_t temp_sensors_count = 0;
 uint8_t temp_sensors_count_prev = 0;
@@ -104,10 +106,15 @@ cmd_dispatch commands[] = {
 
 TextCMD cmd((sizeof(commands)/sizeof(commands[0])),commands);
 
+const uint8_t refresh_interval = 20;
+const uint8_t lookup_interval = 60;
+unsigned long inactivity_ts = 0;
+unsigned long next_refresh_ts = 0;
+unsigned long next_lookup_ts = 0;
+
 void setup () {
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
         rb1wtemps[i].init(ntemp_pins[i].red, ntemp_pins[i].blue,sensors);
-        rb1wtemps[i].refresh(0);
     }
 
     pinMode(ALARM_PIN, OUTPUT);
@@ -166,6 +173,8 @@ uint8_t blink_value = 1;
 unsigned long tick = 0;
 
 void loop () {
+    unsigned long cur_uptime = uptime();
+
     // blink alarm on error
     if (no_reading_errors()) {
         digitalWrite(ALARM_PIN, 0);
@@ -173,41 +182,80 @@ void loop () {
     else {
         digitalWrite(ALARM_PIN, alarm_value);
         alarm_value = !alarm_value;
+        update_temperatures(non_verbose, update_leds_only);
     }
 
-    // re-read sensor addresses
-    if (tick++ % 10 == 0) {
-        refresh_one_wire();
+    // re-read sensor addresses every minute
+    if (next_lookup_ts < cur_uptime) {
+        next_lookup_ts += lookup_interval;
+        if (inactivity_ts < cur_uptime) {
+            refresh_one_wire();
+        }
+    }
+    if (next_refresh_ts < cur_uptime) {
+        next_refresh_ts += refresh_interval;
+        if (inactivity_ts < cur_uptime) {
+            update_temperatures(non_verbose, update_temp_leds);
+        }
     }
 
-    // update temperatures
-    for (uint8_t i = 0; i < MAX_SENSORS; i++) {
-        rb1wtemps[i].led_on = config.led_on;
-        rb1wtemps[i].refresh(tick);
+    if (inactivity_ts < cur_uptime) {
+        delay(250);
     }
-
-    delay(100);
 
     while (Serial.available()) {
+        static char prev_ch = 0;
+        inactivity_ts = cur_uptime + 10;
         char ch = Serial.read();
-        if (ch == '\r') {
+        if (ch == '\b') {
+            if (current_line_end) {
+                Serial.print(F("\b \b"));
+                current_line_end--;
+                current_line[current_line_end] = '\0';
+            }
         }
-        else if ((ch != '\n') && (current_line_end < MAX_CMD_LINE)) {
-            current_line[current_line_end++] = ch;
-            current_line[current_line_end] = '\0';
-            Serial.print(ch);
-            continue;
+        else if ((ch == '\n') || (ch == '\r')) {
+            if (ch == '\n' && (prev_ch == '\r')) {
+                break;
+            }
+            Serial.println();
+            if (current_line_end != 0) {
+                int8_t cmd_ret = cmd.do_dispatch(current_line);
+                switch (cmd_ret) {
+                    case -1: Serial.println(F("unknown command or syntax error. send '?' for help")); break;
+                }
+                Serial.println();
+            }
+            Serial.print(F("> "));
+            current_line[0] = '\0';
+            current_line_end = 0;
         }
-        if (current_line_end == 0) {
-            continue;
+        else {
+            if (current_line_end < MAX_CMD_LINE) {
+                current_line[current_line_end++] = ch;
+                current_line[current_line_end] = '\0';
+                Serial.print(ch);
+            }
         }
+        prev_ch = ch;
+    }
+}
 
+void update_temperatures(bool verbose, bool leds_only) {
+    for (uint8_t i = 0; i < MAX_SENSORS; i++) {
+        if (verbose) {
+            Serial.print('.');
+        }
+        rb1wtemps[i].led_on = config.led_on;
+        if (leds_only) {
+            rb1wtemps[i].update_led_color(uptime());
+        }
+        else {
+            rb1wtemps[i].refresh(uptime());
+        }
+    }
+    if (verbose) {
         Serial.println();
-        cmd.do_dispatch(current_line);
-        Serial.println();
-        Serial.print(F("> "));
-        current_line[0] = '\0';
-        current_line_end = 0;
     }
 }
 
@@ -318,13 +366,15 @@ String uint8_tToString (uint8_t num) {
     }
 }
 
-void cmd_forget(uint8_t argc, char* argv[]) {
+int8_t cmd_forget(uint8_t argc, char* argv[]) {
     if (argc < 2) {
-        return;
+        return -1;
     }
     uint8_t idx = String(argv[1]).toInt();
     if (!idx || (idx > MAX_SENSORS)) {
-        return;
+        Serial.print(F("failed, max sensors count is "));
+        Serial.println(MAX_SENSORS);
+        return 1;
     }
     rb1wtemps[idx-1].reset_address();
     uint8_t base = strlen(MAGIC)+sizeof(config)+(1+sizeof(DeviceAddress))*(idx-1);
@@ -332,9 +382,10 @@ void cmd_forget(uint8_t argc, char* argv[]) {
     Serial.print(F("temp address "));
     Serial.print(idx);
     Serial.println(F(" forgotten"));
+    return 0;
 }
 
-void cmd_tled(uint8_t argc, char* argv[]) {
+int8_t cmd_tled(uint8_t argc, char* argv[]) {
     uint8_t loops = 1;
     if (argc > 1) {
         loops = String(argv[1]).toInt();
@@ -346,12 +397,12 @@ void cmd_tled(uint8_t argc, char* argv[]) {
         Serial.println(loops);
         do_test_led();
     }
-    delay(1000);
+    return 0;
 }
 
-void cmd_led(uint8_t argc, char* argv[]) {
+int8_t cmd_led(uint8_t argc, char* argv[]) {
     if (argc < 2) {
-        return;
+        return -1;
     }
     if (strcmp(argv[1],"on")) {
         config.led_on = false;
@@ -371,9 +422,10 @@ void cmd_led(uint8_t argc, char* argv[]) {
             Serial.println(F("off"));
         }
     }
+    return 0;
 }
 
-void cmd_help(uint8_t argc, char* argv[]) {
+int8_t cmd_help(uint8_t argc, char* argv[]) {
     Serial.println(MAGIC);
     Serial.println(F("supported commands:"));
     Serial.println(F("  temp            - show temperatures from all sensors"));
@@ -383,9 +435,11 @@ void cmd_help(uint8_t argc, char* argv[]) {
     Serial.println(F("  set i2c [num]   - set i2c address (0x18 is default)"));
     Serial.println(F("  tled [num]      - do led blink test num times (1 is default)"));
     Serial.println(F("  help/?          - print this help"));
+    return 0;
 }
 
-void cmd_temp(uint8_t argc, char* argv[]) {
+int8_t cmd_temp(uint8_t argc, char* argv[]) {
+    update_temperatures(be_verbose, update_temp_leds);
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
         Serial.print(F("sensor "));
         Serial.print(i+1);
@@ -412,12 +466,15 @@ void cmd_temp(uint8_t argc, char* argv[]) {
             Serial.println(F(": n/a"));
         }
     }
+    return 0;
 }
 
-void cmd_info(uint8_t argc, char* argv[]) {
+int8_t cmd_info(uint8_t argc, char* argv[]) {
     Serial.println(MAGIC);
     Serial.print(F("sram free: "));
     Serial.println(freeRam());
+    Serial.print(F("uptime: "));
+    Serial.println(uptime_as_string());
     Serial.println(F("current configuration:"));
     Serial.print(F("    i2c_addr: 0x"));
     Serial.println(String(config.i2c_addr, HEX));
@@ -426,9 +483,10 @@ void cmd_info(uint8_t argc, char* argv[]) {
     if (!config.led_on) {
         Serial.println(F("    led indication: off"));
     }
+    return 0;
 }
 
-void cmd_set_i2c(uint8_t argc, char* argv[]) {
+int8_t cmd_set_i2c(uint8_t argc, char* argv[]) {
     uint32_t new_i2c_addr = DFT_I2C_ADDR;
     if (argc > 1) {
         if ((argv[1][0] == '0') && (argv[1][1] == 'x')) {
@@ -445,7 +503,7 @@ void cmd_set_i2c(uint8_t argc, char* argv[]) {
         Serial.print(F("i2c address 0x"));
         Serial.print(String(new_i2c_addr, HEX));
         Serial.println(F(" invalid, must be greater then 0x0E and smaller then 0x7F"));
-        return;
+        return 1;
     }
     Serial.print(F("setting i2c address to: 0x"));
     Serial.println(String(new_i2c_addr, HEX));
@@ -454,6 +512,7 @@ void cmd_set_i2c(uint8_t argc, char* argv[]) {
         EEPROM.write(strlen(MAGIC)+0, config.i2c_addr);
         Wire.begin(config.i2c_addr);
     }
+    return 0;
 }
 
 void i2c_request() {
@@ -489,6 +548,7 @@ void i2c_receive(int num_bytes) {
         if (i2c_register == 0x21) {
             config.led_on = Wire.read();
             i2c_register = 0x01;
+            next_refresh_ts = uptime();
         }
         i2c_register = Wire.read();
     }
@@ -665,7 +725,6 @@ L<https://github.com/jozef/sixtemp_i2c>
 
 =head1 TODO
 
-    - info show uptime
     - info show number of errors per sensor
 
 =head1 LICENSE

@@ -15,7 +15,7 @@ void RB1WTemp::init(uint8_t rpin, uint8_t bpin, DallasTemperature sensors) {
     reset_address();
 }
 
-void RB1WTemp::refresh(unsigned long tick) {
+void RB1WTemp::update_led_color(unsigned long tick) {
     if (!has_address) {
         has_error = false;
         digitalWrite(_red_pin, 0);
@@ -23,8 +23,6 @@ void RB1WTemp::refresh(unsigned long tick) {
         return;
     }
 
-    _sensors.requestTemperaturesByAddress(address);
-    temp_c = _sensors.getTempC(address);
     if (temp_c < -120) {
         has_error = true;
         if (tick % 5 == 0) {
@@ -79,6 +77,14 @@ void RB1WTemp::refresh(unsigned long tick) {
     else {
         digitalWrite(_red_pin, 0);
     }
+}
+
+void RB1WTemp::refresh(unsigned long tick) {
+    if (has_address) {
+        _sensors.requestTemperaturesByAddress(address);
+        temp_c = _sensors.getTempC(address);
+    }
+    update_led_color(tick);
 }
 
 void RB1WTemp::reset_address() {

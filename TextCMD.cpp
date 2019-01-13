@@ -8,21 +8,21 @@ TextCMD::TextCMD(uint8_t count, cmd_dispatch dispatch[]) {
     _dispatch_count = count;
 }
 
-void TextCMD::do_dispatch(char* line) {
+int8_t TextCMD::do_dispatch(char* line) {
     split_line_to_argv(line);
-    do_dispatch();
+    return do_dispatch();
 }
 
-void TextCMD::do_dispatch() {
+int8_t TextCMD::do_dispatch() {
     if (!argc) {
-        return;
+        return 0;
     }
     for (uint8_t i = 0; i < _dispatch_count; i++) {
         if (strcmp(_dispatch[i].cmd, argv[0]) == 0) {
-            _dispatch[i].cb(argc,argv);
-            break;
+            return _dispatch[i].cb(argc,argv);
         }
     }
+    return -1;
 }
 
 void TextCMD::set_argv(uint8_t new_argc, char* new_argv[]) {

@@ -20,6 +20,7 @@ class RB1WTemp {
         RB1WTemp();
         void init(uint8_t rpin, uint8_t bpin, DallasTemperature sensors);
         void refresh(unsigned long tick);
+        void update_led_color(unsigned long tick);
         void reset_address();
         void set_address(DeviceAddress new_address);
         void set_blue(bool blue);

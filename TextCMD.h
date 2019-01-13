@@ -8,7 +8,7 @@ const uint8_t TextCMD_max_argv = 10;
 
 struct cmd_dispatch {
     char* cmd;
-    void (*cb)(uint8_t argc, char* argv[]);
+    int8_t (*cb)(uint8_t argc, char* argv[]);
 };
 
 class TextCMD {
@@ -18,8 +18,8 @@ class TextCMD {
         char* argv[TextCMD_max_argv];
         void split_line_to_argv(char* line);
         void set_argv(uint8_t new_argc, char* new_argv[]);
-        void do_dispatch();
-        void do_dispatch(char* line);
+        int8_t do_dispatch();
+        int8_t do_dispatch(char* line);
         // int argv_to_int(uint8_t idx);    # TODO parse argv[idx-1] and return integer of that argument
     private:
         uint8_t _dispatch_count = 0;
@@ -51,12 +51,13 @@ class TextCMD {
     cmd.do_dispatch("?");
     cmd.do_dispatch("tled 5");
 
-    void cmd_help(uint8_t argc, String argv[]) {
+    int8_t cmd_help(uint8_t argc, String argv[]) {
         Serial.println("supported commands:");
         Serial.println("    tled [num]      - do led blink test num times (1 is default)");
         Serial.println("    help/?          - print this help");
+        return 0;
     }
-    void cmd_tled(uint8_t argc, String argv[]) {
+    int8_t cmd_tled(uint8_t argc, String argv[]) {
         uint8_t loops = 1;
         if (argc > 1) {
             loops = argv[1].toInt();
