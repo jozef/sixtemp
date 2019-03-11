@@ -11,7 +11,7 @@
 #include <DallasTemperature.h>
 #include <UpTime.h>             // https://github.com/jozef/Arduino-Uptime
 #include "RB1WTemp.h"
-#include "TextCMD.h"
+#include <TextCMD.h>            // https://github.com/jozef/Arduino-TextCMD
 
 const char MAGIC[] = "6temp 0.02";
 
