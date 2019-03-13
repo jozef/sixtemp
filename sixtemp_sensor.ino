@@ -366,7 +366,7 @@ String uint8_tToString (uint8_t num) {
     }
 }
 
-int8_t cmd_forget(uint8_t argc, char* argv[]) {
+int8_t cmd_forget(uint8_t argc, const char* argv[]) {
     if (argc < 2) {
         return -1;
     }
@@ -385,7 +385,7 @@ int8_t cmd_forget(uint8_t argc, char* argv[]) {
     return 0;
 }
 
-int8_t cmd_tled(uint8_t argc, char* argv[]) {
+int8_t cmd_tled(uint8_t argc, const char* argv[]) {
     uint8_t loops = 1;
     if (argc > 1) {
         loops = String(argv[1]).toInt();
@@ -400,7 +400,7 @@ int8_t cmd_tled(uint8_t argc, char* argv[]) {
     return 0;
 }
 
-int8_t cmd_led(uint8_t argc, char* argv[]) {
+int8_t cmd_led(uint8_t argc, const char* argv[]) {
     if (argc < 2) {
         return -1;
     }
@@ -425,7 +425,7 @@ int8_t cmd_led(uint8_t argc, char* argv[]) {
     return 0;
 }
 
-int8_t cmd_help(uint8_t argc, char* argv[]) {
+int8_t cmd_help(uint8_t argc, const char* argv[]) {
     Serial.println(MAGIC);
     Serial.println(F("supported commands:"));
     Serial.println(F("  temp            - show temperatures from all sensors"));
@@ -438,7 +438,7 @@ int8_t cmd_help(uint8_t argc, char* argv[]) {
     return 0;
 }
 
-int8_t cmd_temp(uint8_t argc, char* argv[]) {
+int8_t cmd_temp(uint8_t argc, const char* argv[]) {
     update_temperatures(be_verbose, update_temp_leds);
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
         Serial.print(F("sensor "));
@@ -469,7 +469,7 @@ int8_t cmd_temp(uint8_t argc, char* argv[]) {
     return 0;
 }
 
-int8_t cmd_info(uint8_t argc, char* argv[]) {
+int8_t cmd_info(uint8_t argc, const char* argv[]) {
     Serial.println(MAGIC);
     Serial.print(F("sram free: "));
     Serial.println(freeRam());
@@ -486,7 +486,7 @@ int8_t cmd_info(uint8_t argc, char* argv[]) {
     return 0;
 }
 
-int8_t cmd_set_i2c(uint8_t argc, char* argv[]) {
+int8_t cmd_set_i2c(uint8_t argc, const char* argv[]) {
     uint32_t new_i2c_addr = DFT_I2C_ADDR;
     if (argc > 1) {
         if ((argv[1][0] == '0') && (argv[1][1] == 'x')) {
