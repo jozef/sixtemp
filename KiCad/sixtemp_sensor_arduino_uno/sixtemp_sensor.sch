@@ -27,17 +27,6 @@ F 3 "" H 4700 4350 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	5150 3850 4700 3850
-$Comp
-L Connector:Conn_01x02_Female J7
-U 1 1 5C673376
-P 5850 2300
-F 0 "J7" V 5790 2112 50  0000 R CNN
-F 1 "I2C" V 5699 2112 50  0000 R CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x02_P2.54mm_Vertical" H 5850 2300 50  0001 C CNN
-F 3 "~" H 5850 2300 50  0001 C CNN
-	1    5850 2300
-	0    -1   -1   0   
-$EndComp
 Wire Wire Line
 	5950 2750 5950 2550
 Wire Wire Line
@@ -450,20 +439,10 @@ Wire Wire Line
 	1350 6350 1450 6350
 Wire Wire Line
 	1350 6550 1450 6550
-Text GLabel 5750 2550 0    50   Input ~ 0
+Text GLabel 5850 2550 1    50   Input ~ 0
 SCL
-Wire Wire Line
-	5750 2550 5850 2550
-Connection ~ 5850 2550
-Wire Wire Line
-	5850 2550 5850 2500
-Text GLabel 6050 2550 2    50   Input ~ 0
+Text GLabel 5950 2550 1    50   Input ~ 0
 SDA
-Wire Wire Line
-	6050 2550 5950 2550
-Connection ~ 5950 2550
-Wire Wire Line
-	5950 2550 5950 2500
 Text GLabel 1350 5850 0    50   Input ~ 0
 RAW
 Wire Wire Line
@@ -543,7 +522,7 @@ U 1 1 5C778017
 P 2150 5900
 F 0 "U2" H 2150 6915 50  0000 C CNN
 F 1 "Arduino_Uno_Black" H 2150 6824 50  0000 C CNN
-F 2 "Arduino_Shields:Arduino_Uno_Black" H 2150 6100 50  0001 C CNN
+F 2 "Arduino_Shields:Arduino_Uno_Black_2rows" H 2150 6100 50  0001 C CNN
 F 3 "" H 2150 6100 50  0001 C CNN
 	1    2150 5900
 	1    0    0    -1  
@@ -767,7 +746,7 @@ Wire Wire Line
 Wire Wire Line
 	6550 3750 6950 3750
 Wire Wire Line
-	6900 4900 6900 3850
+	6900 4900 6900 4800
 Wire Wire Line
 	6550 3850 6900 3850
 $Comp
@@ -782,14 +761,14 @@ F 3 "https://www.aliexpress.com/item/New-Pro-Mini-atmega328-Board-5V-16M-Replace
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:Conn_01x03_Female J10
+L Connector:Conn_01x05_Female J10
 U 1 1 5CB7CCD0
-P 7000 5600
-F 0 "J10" H 6893 5275 50  0000 C CNN
-F 1 "debug" H 6893 5366 50  0000 C CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical" H 7000 5600 50  0001 C CNN
-F 3 "~" H 7000 5600 50  0001 C CNN
-	1    7000 5600
+P 7000 5500
+F 0 "J10" H 6900 5800 50  0000 C CNN
+F 1 "debug" H 6900 5900 50  0000 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x05_P2.54mm_Vertical" H 7000 5500 50  0001 C CNN
+F 3 "~" H 7000 5500 50  0001 C CNN
+	1    7000 5500
 	1    0    0    1   
 $EndComp
 Wire Wire Line
@@ -842,7 +821,7 @@ U 1 1 5C908D24
 P 5700 750
 F 0 "J12" V 5865 680 50  0000 C CNN
 F 1 "Conn_01x12_Female" V 5774 680 50  0000 C CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x12_P2.54mm_Vertical" H 5700 750 50  0001 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x12_P2.54mm_Vertical" H 5700 750 50  0001 C CNN
 F 3 "~" H 5700 750 50  0001 C CNN
 	1    5700 750 
 	0    -1   -1   0   
@@ -1066,10 +1045,10 @@ Wire Wire Line
 Wire Wire Line
 	1750 2450 1750 2500
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0105
 U 1 1 5CBFA852
 P 9800 1750
-F 0 "#PWR?" H 9800 1500 50  0001 C CNN
+F 0 "#PWR0105" H 9800 1500 50  0001 C CNN
 F 1 "GND" H 9805 1577 50  0000 C CNN
 F 2 "" H 9800 1750 50  0001 C CNN
 F 3 "" H 9800 1750 50  0001 C CNN
@@ -1077,10 +1056,10 @@ F 3 "" H 9800 1750 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L power:+5V #PWR?
+L power:+5V #PWR0107
 U 1 1 5CBFA858
 P 9800 1400
-F 0 "#PWR?" H 9800 1250 50  0001 C CNN
+F 0 "#PWR0107" H 9800 1250 50  0001 C CNN
 F 1 "+5V" H 9815 1573 50  0000 C CNN
 F 2 "" H 9800 1400 50  0001 C CNN
 F 3 "" H 9800 1400 50  0001 C CNN
@@ -1126,10 +1105,10 @@ R
 Text Notes 10550 1850 0    50   ~ 0
 B
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0109
 U 1 1 5CC40C16
 P 9800 3750
-F 0 "#PWR?" H 9800 3500 50  0001 C CNN
+F 0 "#PWR0109" H 9800 3500 50  0001 C CNN
 F 1 "GND" H 9805 3577 50  0000 C CNN
 F 2 "" H 9800 3750 50  0001 C CNN
 F 3 "" H 9800 3750 50  0001 C CNN
@@ -1137,10 +1116,10 @@ F 3 "" H 9800 3750 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L power:+5V #PWR?
+L power:+5V #PWR0110
 U 1 1 5CC40C1C
 P 9800 3400
-F 0 "#PWR?" H 9800 3250 50  0001 C CNN
+F 0 "#PWR0110" H 9800 3250 50  0001 C CNN
 F 1 "+5V" H 9815 3573 50  0000 C CNN
 F 2 "" H 9800 3400 50  0001 C CNN
 F 3 "" H 9800 3400 50  0001 C CNN
@@ -1219,10 +1198,10 @@ Wire Wire Line
 Wire Wire Line
 	7500 4750 8400 4750
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0111
 U 1 1 5CCFF868
 P 9800 2800
-F 0 "#PWR?" H 9800 2550 50  0001 C CNN
+F 0 "#PWR0111" H 9800 2550 50  0001 C CNN
 F 1 "GND" H 9805 2627 50  0000 C CNN
 F 2 "" H 9800 2800 50  0001 C CNN
 F 3 "" H 9800 2800 50  0001 C CNN
@@ -1230,10 +1209,10 @@ F 3 "" H 9800 2800 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L power:+5V #PWR?
+L power:+5V #PWR0112
 U 1 1 5CCFF86E
 P 9800 2500
-F 0 "#PWR?" H 9800 2350 50  0001 C CNN
+F 0 "#PWR0112" H 9800 2350 50  0001 C CNN
 F 1 "+5V" H 9815 2673 50  0000 C CNN
 F 2 "" H 9800 2500 50  0001 C CNN
 F 3 "" H 9800 2500 50  0001 C CNN
@@ -1271,10 +1250,10 @@ R
 Text Notes 10550 2950 0    50   ~ 0
 B
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0113
 U 1 1 5CD0DE18
 P 9800 4800
-F 0 "#PWR?" H 9800 4550 50  0001 C CNN
+F 0 "#PWR0113" H 9800 4550 50  0001 C CNN
 F 1 "GND" H 9805 4627 50  0000 C CNN
 F 2 "" H 9800 4800 50  0001 C CNN
 F 3 "" H 9800 4800 50  0001 C CNN
@@ -1282,10 +1261,10 @@ F 3 "" H 9800 4800 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L power:+5V #PWR?
+L power:+5V #PWR0114
 U 1 1 5CD0DE1E
 P 9800 4500
-F 0 "#PWR?" H 9800 4350 50  0001 C CNN
+F 0 "#PWR0114" H 9800 4350 50  0001 C CNN
 F 1 "+5V" H 9815 4673 50  0000 C CNN
 F 2 "" H 9800 4500 50  0001 C CNN
 F 3 "" H 9800 4500 50  0001 C CNN
@@ -1445,4 +1424,26 @@ NoConn ~ 2750 5550
 NoConn ~ 2750 5450
 NoConn ~ 2750 5350
 NoConn ~ 2750 5150
+Wire Wire Line
+	6800 5300 6800 4800
+Wire Wire Line
+	6800 4800 6900 4800
+Connection ~ 6900 4800
+Wire Wire Line
+	6900 4800 6900 3850
+Wire Wire Line
+	6800 5400 6400 5400
+$Comp
+L power:+5V #PWR0115
+U 1 1 5C942B34
+P 6400 5350
+F 0 "#PWR0115" H 6400 5200 50  0001 C CNN
+F 1 "+5V" H 6415 5523 50  0000 C CNN
+F 2 "" H 6400 5350 50  0001 C CNN
+F 3 "" H 6400 5350 50  0001 C CNN
+	1    6400 5350
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	6400 5400 6400 5350
 $EndSCHEMATC
