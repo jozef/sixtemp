@@ -56,12 +56,12 @@ struct ntemp_pin {
     uint8_t blue;
 };
 ntemp_pin ntemp_pins[] = {
-    { 10, 12 },
-    { 11, A0 },
-    { 9, 8 },
-    { 6, 7 },
+    { 3, 2 },
     { 5, 4 },
-    { 3, 2 }
+    { 6, 7 },
+    { 9, 8 },
+    { 11, A0 },
+    { 10, 12 }
 };
 
 RB1WTemp rb1wtemps[MAX_SENSORS];
