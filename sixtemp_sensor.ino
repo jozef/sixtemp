@@ -25,9 +25,6 @@ const bool update_temp_leds = false;
 const bool update_leds_only = true;
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-uint8_t temp_sensor_current = 0;
-uint8_t temp_sensors_count = 0;
-uint8_t temp_sensors_count_prev = 0;
 
 #define DFT_I2C_ADDR 0x18
 struct sixtemp_config {
@@ -81,6 +78,10 @@ cmd_dispatch commands[] = {
     {
         "forget",
         &cmd_forget
+    },
+    {
+        "cfg reset",
+        &cmd_cfg_reset
     },
     {
         "temp",
@@ -345,7 +346,7 @@ void refresh_one_wire() {
         // save and use new found sensor
         if ((sensor_idx == -1) && (free_slot_idx != -1)) {
             Serial.print(F("new sensor found, storing at: "));
-            Serial.println(free_slot_idx);
+            Serial.println(free_slot_idx+1);
             Serial.println(F("> "));
             rb1wtemps[free_slot_idx].set_address(found_sensor);
             uint8_t base = strlen(MAGIC)+sizeof(config)+(1+sizeof(DeviceAddress))*free_slot_idx;
@@ -434,11 +435,13 @@ int8_t cmd_help(uint8_t argc, const char* argv[]) {
     Serial.println(F("  info            - show sram usage and configuration"));
     Serial.println(F("  set i2c [num]   - set i2c address (0x18 is default)"));
     Serial.println(F("  tled [num]      - do led blink test num times (1 is default)"));
+    Serial.println(F("  cfg reset       - factory reset configuration"));
     Serial.println(F("  help/?          - print this help"));
     return 0;
 }
 
 int8_t cmd_temp(uint8_t argc, const char* argv[]) {
+    refresh_one_wire();
     update_temperatures(be_verbose, update_temp_leds);
     for (uint8_t i = 0; i < MAX_SENSORS; i++) {
         Serial.print(F("sensor "));
@@ -517,7 +520,13 @@ int8_t cmd_set_i2c(uint8_t argc, const char* argv[]) {
 
 void i2c_request() {
     if (i2c_register == 0x60) {
-        Wire.write(MAX_SENSORS);
+        uint8_t count = 0;
+        for (uint8_t i = 0; i < MAX_SENSORS; i++) {
+            if (rb1wtemps[i].has_address) {
+                count++;
+            }
+        }
+        Wire.write(count);
     }
     else if (i2c_register == 0x01) {
         Wire.write(config.led_on);
@@ -570,6 +579,14 @@ uint8_t hex_char_to_int(char digit_char) {
     if ((digit_char >= 'A') && (digit_char <= 'F')) {
         return 10+(digit_char - 'A');
     }
+    return 0;
+}
+
+int8_t cmd_cfg_reset(uint8_t argc, const char* argv[]) {
+    EEPROM.write(0, 0);
+    Serial.print(F("magic cleared, now doing reset"));
+    void (*do_reset)(void) = 0;
+    do_reset();
     return 0;
 }
 
