@@ -16,7 +16,7 @@ class RB1WTemp {
         bool has_error = false;
         bool has_address = false;
         bool led_on = true;
-        float temp_c = -127;
+        int16_t tdeg = -1270;
         RB1WTemp();
         void init(uint8_t rpin, uint8_t bpin, DallasTemperature sensors);
         void refresh(unsigned long tick);

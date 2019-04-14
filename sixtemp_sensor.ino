@@ -13,7 +13,7 @@
 #include "RB1WTemp.h"
 #include <TextCMD.h>            // https://github.com/jozef/Arduino-TextCMD
 
-const char MAGIC[] = "6temp 0.02";
+const char MAGIC[] = "6temp 0.03";
 
 // temperature vars
 #define ONE_WIRE_BUS A1    // data one wire port A1
@@ -40,8 +40,6 @@ sixtemp_config config = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0  // place-holder for future config options
 };
 
-char to_send_reg0[2+sizeof(float)+sizeof(DeviceAddress)];
-
 DeviceAddress temp_sensors[MAX_SENSORS];
 
 #define MAX_CMD_LINE 0x1F
@@ -62,6 +60,8 @@ ntemp_pin ntemp_pins[] = {
 };
 
 RB1WTemp rb1wtemps[MAX_SENSORS];
+
+char to_send_reg0[2+sizeof(rb1wtemps[0].tdeg)+sizeof(DeviceAddress)];
 
 #define ALARM_PIN A2
 uint8_t alarm_value = 0;
@@ -458,9 +458,9 @@ int8_t cmd_temp(uint8_t argc, const char* argv[]) {
                 Serial.println(F("ERROR"));
             }
             else {
-                Serial.print(int(rb1wtemps[i].temp_c));
+                Serial.print(rb1wtemps[i].tdeg/10);
                 Serial.print(F("."));
-                Serial.print(int(rb1wtemps[i].temp_c*10)-(int(rb1wtemps[i].temp_c)*10));
+                Serial.print(abs(rb1wtemps[i].tdeg % 10));
                 Serial.print(F(" "));
                 Serial.println(F("C"));
             }
@@ -537,8 +537,8 @@ void i2c_request() {
         to_send_reg0[1] = rb1wtemps[idx].has_address;
         memcpy(
             &to_send_reg0[2],
-            &rb1wtemps[idx].temp_c,
-            sizeof(float)
+            &rb1wtemps[idx].tdeg,
+            sizeof(rb1wtemps[idx].tdeg)
         );
         memcpy(
             &to_send_reg0[2+sizeof(float)],
@@ -623,7 +623,7 @@ First I2C master has to send one byte which is the read/write address. Addresses
                     struct sixtemp_sensor {
                         bool has_error;
                         bool has_address;
-                        float temp_c;
+                        int16_t tdeg;
                         char address[8];
                     };
 

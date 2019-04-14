@@ -23,7 +23,7 @@ void RB1WTemp::update_led_color(unsigned long tick) {
         return;
     }
 
-    if (temp_c < -120) {
+    if (tdeg < -1200) {
         has_error = true;
         if (tick % 5 == 0) {
             digitalWrite(_red_pin, 1);
@@ -42,7 +42,7 @@ void RB1WTemp::update_led_color(unsigned long tick) {
     if (!led_on) {
         digitalWrite(_blue_pin, 0);
     }
-    else if (temp_c < 10) {
+    else if (tdeg < 100) {
         if (tick % 2 == 0) {
             digitalWrite(_blue_pin, 0);
         }
@@ -50,7 +50,7 @@ void RB1WTemp::update_led_color(unsigned long tick) {
             digitalWrite(_blue_pin, 1);
         }
     }
-    else if (temp_c < 37) {
+    else if (tdeg < 370) {
         digitalWrite(_blue_pin, 1);
     }
     else {
@@ -60,7 +60,7 @@ void RB1WTemp::update_led_color(unsigned long tick) {
     if (!led_on) {
         digitalWrite(_red_pin, 0);
     }
-    else if (temp_c > 90) {
+    else if (tdeg > 900) {
         if (tick % 2 == 0) {
             digitalWrite(_red_pin, 0);
         }
@@ -68,11 +68,11 @@ void RB1WTemp::update_led_color(unsigned long tick) {
             digitalWrite(_red_pin, 1);
         }
     }
-    else if (temp_c >= 37) {
-        analogWrite(_red_pin, int(230*((temp_c - 37)/90))+25);
+    else if (tdeg >= 370) {
+        analogWrite(_red_pin, uint8_t((230*uint32_t(tdeg - 370))/900)+25);
     }
-    else if (temp_c > 20) {
-        analogWrite(_red_pin, int(255*((temp_c - 20)/17)));
+    else if (tdeg > 200) {
+        analogWrite(_red_pin, uint8_t((255*uint32_t(tdeg - 200))/170));
     }
     else {
         digitalWrite(_red_pin, 0);
@@ -82,7 +82,7 @@ void RB1WTemp::update_led_color(unsigned long tick) {
 void RB1WTemp::refresh(unsigned long tick) {
     if (has_address) {
         _sensors.requestTemperaturesByAddress(address);
-        temp_c = _sensors.getTempC(address);
+        tdeg = _sensors.getTempC(address)*10;
     }
     update_led_color(tick);
 }
