@@ -27,10 +27,6 @@ F 3 "" H 4700 4350 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	5150 3850 4700 3850
-Wire Wire Line
-	5950 2750 5950 2550
-Wire Wire Line
-	5850 2750 5850 2550
 $Comp
 L Connector:Conn_01x01_Female J8
 U 1 1 5C6735DF
@@ -439,9 +435,9 @@ Wire Wire Line
 	1350 6350 1450 6350
 Wire Wire Line
 	1350 6550 1450 6550
-Text GLabel 5850 2550 1    50   Input ~ 0
+Text GLabel 5850 1600 1    50   Input ~ 0
 SCL
-Text GLabel 5950 2550 1    50   Input ~ 0
+Text GLabel 5950 1600 1    50   Input ~ 0
 SDA
 Text GLabel 1350 5850 0    50   Input ~ 0
 RAW
@@ -1442,4 +1438,60 @@ Wire Wire Line
 	2400 2500 2400 2700
 Connection ~ 2400 2500
 Connection ~ 2400 2700
+$Comp
+L Device:R_Small R81
+U 1 1 5CEE31EC
+P 6200 1950
+F 0 "R81" V 6004 1950 50  0000 C CNN
+F 1 "4k7" V 6095 1950 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 6200 1950 50  0001 C CNN
+F 3 "~" H 6200 1950 50  0001 C CNN
+	1    6200 1950
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R82
+U 1 1 5CEE3295
+P 6200 2250
+F 0 "R82" V 6004 2250 50  0000 C CNN
+F 1 "4k7" V 6095 2250 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 6200 2250 50  0001 C CNN
+F 3 "~" H 6200 2250 50  0001 C CNN
+	1    6200 2250
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5950 1600 5950 1950
+Wire Wire Line
+	5850 1600 5850 2250
+Wire Wire Line
+	5950 1950 6100 1950
+Connection ~ 5950 1950
+Wire Wire Line
+	5950 1950 5950 2750
+Wire Wire Line
+	6300 1950 6400 1950
+Wire Wire Line
+	6400 1950 6400 1600
+Wire Wire Line
+	6300 2250 6400 2250
+Wire Wire Line
+	6400 2250 6400 1950
+Connection ~ 6400 1950
+Wire Wire Line
+	5850 2250 6100 2250
+Connection ~ 5850 2250
+Wire Wire Line
+	5850 2250 5850 2750
+$Comp
+L power:+5V #PWR0116
+U 1 1 5CF7CC52
+P 6400 1600
+F 0 "#PWR0116" H 6400 1450 50  0001 C CNN
+F 1 "+5V" H 6415 1773 50  0000 C CNN
+F 2 "" H 6400 1600 50  0001 C CNN
+F 3 "" H 6400 1600 50  0001 C CNN
+	1    6400 1600
+	-1   0    0    -1  
+$EndComp
 $EndSCHEMATC

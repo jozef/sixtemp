@@ -27,10 +27,6 @@ F 3 "" H 5500 4800 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	5950 4300 5500 4300
-Wire Wire Line
-	6750 3200 6750 3000
-Wire Wire Line
-	6650 3200 6650 3000
 $Comp
 L Device:R R101
 U 1 1 5C67383A
@@ -329,9 +325,9 @@ Wire Wire Line
 	1200 6200 1300 6200
 Wire Wire Line
 	1200 6400 1300 6400
-Text GLabel 6650 3000 1    50   Input ~ 0
+Text GLabel 6650 2050 1    50   Input ~ 0
 SCL
-Text GLabel 6750 3000 1    50   Input ~ 0
+Text GLabel 6750 2050 1    50   Input ~ 0
 SDA
 Text GLabel 1200 5700 0    50   Input ~ 0
 RAW
@@ -1423,4 +1419,60 @@ Wire Wire Line
 Wire Wire Line
 	6450 1350 5550 1350
 Connection ~ 5550 1350
+$Comp
+L Device:R_Small R81
+U 1 1 5CE21192
+P 6950 2300
+F 0 "R81" V 6754 2300 50  0000 C CNN
+F 1 "4k7" V 6845 2300 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 6950 2300 50  0001 C CNN
+F 3 "~" H 6950 2300 50  0001 C CNN
+	1    6950 2300
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R82
+U 1 1 5CE21242
+P 6950 2600
+F 0 "R82" V 6754 2600 50  0000 C CNN
+F 1 "4k7" V 6845 2600 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 6950 2600 50  0001 C CNN
+F 3 "~" H 6950 2600 50  0001 C CNN
+	1    6950 2600
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	7050 2300 7200 2300
+Wire Wire Line
+	7050 2600 7200 2600
+Wire Wire Line
+	7200 2600 7200 2300
+Wire Wire Line
+	6850 2300 6750 2300
+Wire Wire Line
+	6750 2050 6750 2300
+Wire Wire Line
+	6850 2600 6650 2600
+Wire Wire Line
+	6650 2050 6650 2600
+Wire Wire Line
+	6750 2300 6750 3200
+Connection ~ 6750 2300
+Wire Wire Line
+	6650 2600 6650 3200
+Connection ~ 6650 2600
+$Comp
+L power:+5V #PWR0103
+U 1 1 5CEA71E5
+P 7200 2100
+F 0 "#PWR0103" H 7200 1950 50  0001 C CNN
+F 1 "+5V" H 7215 2273 50  0000 C CNN
+F 2 "" H 7200 2100 50  0001 C CNN
+F 3 "" H 7200 2100 50  0001 C CNN
+	1    7200 2100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7200 2300 7200 2100
+Connection ~ 7200 2300
 $EndSCHEMATC
