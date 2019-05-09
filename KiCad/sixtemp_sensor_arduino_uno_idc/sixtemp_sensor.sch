@@ -634,24 +634,18 @@ $EndComp
 $Comp
 L Connector:Conn_01x05_Female J10
 U 1 1 5CB7CCD0
-P 7800 5950
-F 0 "J10" H 7700 6250 50  0000 C CNN
-F 1 "debug" H 7700 6350 50  0000 C CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x05_P2.54mm_Vertical" H 7800 5950 50  0001 C CNN
-F 3 "~" H 7800 5950 50  0001 C CNN
-	1    7800 5950
-	1    0    0    1   
+P 7900 6050
+F 0 "J10" H 7800 6350 50  0000 C CNN
+F 1 "debug" H 7800 6450 50  0000 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x05_P2.54mm_Vertical" H 7900 6050 50  0001 C CNN
+F 3 "~" H 7900 6050 50  0001 C CNN
+	1    7900 6050
+	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	7350 6150 7600 6150
 Wire Wire Line
 	7350 4600 7450 4600
 Wire Wire Line
-	7450 6050 7600 6050
-Wire Wire Line
 	7350 4500 7550 4500
-Wire Wire Line
-	7550 5950 7600 5950
 Text GLabel 7950 2050 1    50   Input ~ 0
 D9~~
 Text GLabel 7950 2450 1    50   Input ~ 0
@@ -813,27 +807,23 @@ NoConn ~ 2600 5300
 NoConn ~ 2600 5200
 NoConn ~ 2600 5000
 Wire Wire Line
-	7600 5750 7600 5250
-Wire Wire Line
 	7600 5250 7700 5250
 Connection ~ 7700 5250
 Wire Wire Line
 	7700 5250 7700 4300
-Wire Wire Line
-	7600 5850 7200 5850
 $Comp
 L power:+5V #PWR0115
 U 1 1 5C942B34
-P 7200 5800
-F 0 "#PWR0115" H 7200 5650 50  0001 C CNN
-F 1 "+5V" H 7215 5973 50  0000 C CNN
-F 2 "" H 7200 5800 50  0001 C CNN
-F 3 "" H 7200 5800 50  0001 C CNN
-	1    7200 5800
+P 7200 5900
+F 0 "#PWR0115" H 7200 5750 50  0001 C CNN
+F 1 "+5V" H 7215 6073 50  0000 C CNN
+F 2 "" H 7200 5900 50  0001 C CNN
+F 3 "" H 7200 5900 50  0001 C CNN
+	1    7200 5900
 	-1   0    0    -1  
 $EndComp
 Wire Wire Line
-	7200 5850 7200 5800
+	7200 5950 7200 5900
 Wire Wire Line
 	3200 2800 3200 2950
 Wire Wire Line
@@ -1282,11 +1272,7 @@ DTR
 Wire Wire Line
 	7350 4700 7350 5150
 Connection ~ 7450 5300
-Wire Wire Line
-	7450 5300 7450 6050
 Connection ~ 7550 5450
-Wire Wire Line
-	7550 5450 7550 5950
 Wire Wire Line
 	7450 4600 7450 5300
 Wire Wire Line
@@ -1294,8 +1280,6 @@ Wire Wire Line
 Wire Wire Line
 	7200 5150 7350 5150
 Connection ~ 7350 5150
-Wire Wire Line
-	7350 5150 7350 6150
 Text GLabel 4050 5150 1    50   Input ~ 0
 A6
 Text GLabel 4050 5650 3    50   Input ~ 0
@@ -1475,4 +1459,22 @@ $EndComp
 Wire Wire Line
 	7200 2300 7200 2100
 Connection ~ 7200 2300
+Wire Wire Line
+	7700 6250 7350 6250
+Wire Wire Line
+	7350 5150 7350 6250
+Wire Wire Line
+	7450 6150 7700 6150
+Wire Wire Line
+	7450 5300 7450 6150
+Wire Wire Line
+	7550 6050 7700 6050
+Wire Wire Line
+	7550 5450 7550 6050
+Wire Wire Line
+	7200 5950 7700 5950
+Wire Wire Line
+	7700 5850 7600 5850
+Wire Wire Line
+	7600 5250 7600 5850
 $EndSCHEMATC
