@@ -632,12 +632,12 @@ F 3 "https://www.aliexpress.com/item/New-Pro-Mini-atmega328-Board-5V-16M-Replace
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:Conn_01x05_Female J10
+L Connector:Conn_01x06_Female J10
 U 1 1 5CB7CCD0
 P 7900 6050
 F 0 "J10" H 7800 6350 50  0000 C CNN
 F 1 "debug" H 7800 6450 50  0000 C CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x05_P2.54mm_Vertical" H 7900 6050 50  0001 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical" H 7900 6050 50  0001 C CNN
 F 3 "~" H 7900 6050 50  0001 C CNN
 	1    7900 6050
 	1    0    0    -1  
@@ -822,8 +822,6 @@ F 3 "" H 7200 5900 50  0001 C CNN
 	1    7200 5900
 	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	7200 5950 7200 5900
 Wire Wire Line
 	3200 2800 3200 2950
 Wire Wire Line
@@ -1460,21 +1458,28 @@ Wire Wire Line
 	7200 2300 7200 2100
 Connection ~ 7200 2300
 Wire Wire Line
-	7700 6250 7350 6250
-Wire Wire Line
-	7350 5150 7350 6250
-Wire Wire Line
-	7450 6150 7700 6150
-Wire Wire Line
-	7450 5300 7450 6150
-Wire Wire Line
-	7550 6050 7700 6050
-Wire Wire Line
-	7550 5450 7550 6050
-Wire Wire Line
-	7200 5950 7700 5950
-Wire Wire Line
 	7700 5850 7600 5850
 Wire Wire Line
 	7600 5250 7600 5850
+Wire Wire Line
+	7600 5850 7600 5950
+Wire Wire Line
+	7600 5950 7700 5950
+Connection ~ 7600 5850
+Wire Wire Line
+	7550 6150 7700 6150
+Wire Wire Line
+	7550 5450 7550 6150
+Wire Wire Line
+	7350 6350 7700 6350
+Wire Wire Line
+	7350 5150 7350 6350
+Wire Wire Line
+	7450 6250 7700 6250
+Wire Wire Line
+	7450 5300 7450 6250
+Wire Wire Line
+	7200 6050 7700 6050
+Wire Wire Line
+	7200 5900 7200 6050
 $EndSCHEMATC
