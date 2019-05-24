@@ -63,7 +63,8 @@ RB1WTemp rb1wtemps[MAX_SENSORS];
 
 char to_send_reg0[2+sizeof(rb1wtemps[0].tdeg)+sizeof(DeviceAddress)];
 
-#define ALARM_PIN A2
+#define ALARM_R_PIN A3
+#define ALARM_B_PIN A2
 uint8_t alarm_value = 0;
 
 cmd_dispatch commands[] = {
@@ -118,7 +119,8 @@ void setup () {
         rb1wtemps[i].init(ntemp_pins[i].red, ntemp_pins[i].blue,sensors);
     }
 
-    pinMode(ALARM_PIN, OUTPUT);
+    pinMode(ALARM_R_PIN, OUTPUT);
+    pinMode(ALARM_B_PIN, OUTPUT);
 
     Serial.begin(9600);
     while (Serial.available()) { Serial.read(); }
@@ -178,10 +180,12 @@ void loop () {
 
     // blink alarm on error
     if (no_reading_errors()) {
-        digitalWrite(ALARM_PIN, 0);
+        digitalWrite(ALARM_R_PIN, 0);
+        digitalWrite(ALARM_B_PIN, 0);
     }
     else {
-        digitalWrite(ALARM_PIN, alarm_value);
+        digitalWrite(ALARM_R_PIN, (alarm_value ? 1 : 0));
+        digitalWrite(ALARM_B_PIN, (alarm_value ? 1 : 0));
         alarm_value = !alarm_value;
         update_temperatures(non_verbose, update_leds_only);
     }
@@ -281,6 +285,9 @@ void do_test_led() {
         rb1wtemps[i].set_red(0);
         rb1wtemps[i].set_blue(false);
     }
+    digitalWrite(ALARM_R_PIN, false);
+    digitalWrite(ALARM_B_PIN, false);
+
     Serial.println(F("fade all in/out red"));
     for (int r = 0; r < 255; r = r + 8) {
         for (uint8_t i = 0; i < MAX_SENSORS; i++) {
@@ -306,6 +313,10 @@ void do_test_led() {
         rb1wtemps[i].set_red(false);
         delay(100);
     }
+    digitalWrite(ALARM_R_PIN, true);
+    Serial.println(F(" red alarm"));
+    delay(500);
+    digitalWrite(ALARM_R_PIN, false);
     delay(500);
 
     Serial.println(F("LED test."));
@@ -318,6 +329,10 @@ void do_test_led() {
         rb1wtemps[i].set_blue(false);
         delay(100);
     }
+    digitalWrite(ALARM_B_PIN, true);
+    Serial.println(F(" blue alarm"));
+    delay(500);
+    digitalWrite(ALARM_B_PIN, false);
     delay(500);
 }
 

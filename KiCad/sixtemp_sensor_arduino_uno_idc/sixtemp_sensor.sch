@@ -779,8 +779,8 @@ Wire Wire Line
 NoConn ~ 5950 4400
 Wire Wire Line
 	9350 3200 9350 3400
-NoConn ~ 5950 4200
-NoConn ~ 5950 4100
+NoConn ~ 6450 3200
+NoConn ~ 6550 3200
 NoConn ~ 5950 3800
 NoConn ~ 7350 4400
 NoConn ~ 1400 5000
@@ -1278,10 +1278,10 @@ Wire Wire Line
 Wire Wire Line
 	7200 5150 7350 5150
 Connection ~ 7350 5150
-Text GLabel 4050 5150 1    50   Input ~ 0
-A6
 Text GLabel 4050 5650 3    50   Input ~ 0
-A7
+A2
+Text GLabel 4050 5150 1    50   Input ~ 0
+A3
 Text GLabel 4050 6900 3    50   Input ~ 0
 D7_Blue
 Text GLabel 4050 6400 1    50   Input ~ 0
@@ -1308,10 +1308,6 @@ F 3 "~" H 5000 1350 50  0001 C CNN
 	1    5000 1350
 	0    -1   1    0   
 $EndComp
-Wire Wire Line
-	5150 950  5550 950 
-Wire Wire Line
-	5150 1350 5550 1350
 $Comp
 L Device:LED_Dual_AACC D7
 U 1 1 5D3761B5
@@ -1343,15 +1339,10 @@ F 3 "~" H 3000 1300 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	3150 1300 3200 1300
-Text GLabel 5550 900  1    50   Input ~ 0
-A6
-Text GLabel 5550 1400 3    50   Input ~ 0
-A7
-Wire Wire Line
-	5550 900  5550 950 
-Connection ~ 5550 950 
-Wire Wire Line
-	5550 1400 5550 1350
+Text GLabel 5800 1350 2    50   Input ~ 0
+A2
+Text GLabel 5800 950  2    50   Input ~ 0
+A3
 Wire Wire Line
 	4850 1350 4600 1350
 Wire Wire Line
@@ -1392,15 +1383,6 @@ Wire Wire Line
 	5350 6600 5350 6800
 Wire Wire Line
 	5250 6700 5450 6700
-Wire Wire Line
-	6550 3200 6550 950 
-Wire Wire Line
-	5550 950  6550 950 
-Wire Wire Line
-	6450 3200 6450 1350
-Wire Wire Line
-	6450 1350 5550 1350
-Connection ~ 5550 1350
 $Comp
 L Device:R_Small R81
 U 1 1 5CE21192
@@ -1482,4 +1464,12 @@ Wire Wire Line
 	7200 6050 7700 6050
 Wire Wire Line
 	7200 5900 7200 6050
+Text GLabel 5950 4200 0    50   Input ~ 0
+A3
+Text GLabel 5950 4100 0    50   Input ~ 0
+A2
+Wire Wire Line
+	5150 1350 5800 1350
+Wire Wire Line
+	5150 950  5800 950 
 $EndSCHEMATC
