@@ -623,8 +623,6 @@ same positions are assigned between power-cycles. It provides the
 temperature readings via I2C interface and it also shows the temperature
 using 6xred-blue leds.
 
-It's work-in-progress -> will provide more description & images later on.
-
 =head1 I2C CLIENT
 
 Connected to I2C, by default, responds on 0x18 address.
@@ -751,13 +749,20 @@ leds to test if all are wired correctly:
 
 Clone the repository folder into F<sketchbook/sixtemp_sensor> and upload to Arduino.
 
+=head1 HARDWARE
+
+KiCad schemas and pcb-s can be found in F<KiCad/> folder.
+
+See L<https://blog.kutej.net/2019/03/sixtemp> for pictures of the hardware.
+
 =head1 SEE ALSO
 
-L<https://github.com/jozef/sixtemp_i2c>
+Client library: L<https://github.com/jozef/sixtemp_i2c>
+
 
 =head1 TODO
 
-    - info show number of errors per sensor
+    - info count&show number of errors per sensor
 
 =head1 LICENSE
 

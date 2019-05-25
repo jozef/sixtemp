@@ -15,22 +15,21 @@ DESCRIPTION
     provides the temperature readings via I2C interface and it also shows
     the temperature using 6xred-blue leds.
 
-    It's work-in-progress -> will provide more description & images later
-    on.
-
 I2C CLIENT
 
     Connected to I2C, by default, responds on 0x18 address.
 
-    First I2C master has to send one byte which is the read address.
+    First I2C master has to send one byte which is the read/write address.
     Addresses are:
 
+        0x01        led on/off bool flag
+        0x21        set led on/off flag. second byte is flag value
         0x60        read 1 byte with number of sensors
         0x61..0x66  read 14 bytes of sensor 1..6 data:
                         struct sixtemp_sensor {
                             bool has_error;
                             bool has_address;
-                            float temp_c;
+                            int16_t tdeg;
                             char address[8];
                         };
 
@@ -144,9 +143,20 @@ INSTALL
     Clone the repository folder into sketchbook/sixtemp_sensor and upload
     to Arduino.
 
+HARDWARE
+
+    KiCad schemas and pcb-s can be found in KiCad/ folder.
+
+    See https://blog.kutej.net/2019/03/sixtemp for pictures of the
+    hardware.
+
 SEE ALSO
 
-    https://github.com/jozef/sixtemp_i2c
+    Client library: https://github.com/jozef/sixtemp_i2c
+
+TODO
+
+        - info count&show number of errors per sensor
 
 LICENSE
 
