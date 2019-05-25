@@ -623,7 +623,7 @@ same positions are assigned between power-cycles. It provides the
 temperature readings via I2C interface and it also shows the temperature
 using 6xred-blue leds.
 
-=head1 I2C CLIENT
+=head2 I2C SLAVE device
 
 Connected to I2C, by default, responds on 0x18 address.
 
@@ -640,7 +640,7 @@ First I2C master has to send one byte which is the read/write address. Addresses
                         char address[8];
                     };
 
-=head1 SERIAL INTERFACE
+=head2 SERIAL INTERFACE
 
 Using Arduino serial port:
 
@@ -650,7 +650,7 @@ Using Arduino serial port:
 ^^^ start-up message in case if sensors and configuration was read
 successfully from eeprom.
 
-=head2 help/?
+=head3 help/?
 
 Prints version and available commands:
 
@@ -664,7 +664,7 @@ Prints version and available commands:
       tled [num]      - do led blink test num times (1 is default)
       help/?          - print this help
 
-=head2 info
+=head3 info
 
 Prints version and debug/info:
 
@@ -675,7 +675,7 @@ Prints version and debug/info:
         i2c_addr: 0x18
         i2c_register: 0x0
 
-=head2 temp
+=head3 temp
 
 Prints all available temparature sensor readings:
 
@@ -687,7 +687,7 @@ Prints all available temparature sensor readings:
     sensor 5/6 [28ffa59492160558]: ERROR
     sensor 6/6 [286164122f89682a]: 24.0 C
 
-=head2 forget
+=head3 forget
 
 Forget one temperature sensor:
 
@@ -702,7 +702,7 @@ Forget one temperature sensor:
     sensor 5/6 [28ffa59492160558]: ERROR
     sensor 6/6 [286164122f89682a]: 24.0 C
 
-head2 set i2c
+=head3 set i2c
 
 Change I2C client address:
 
@@ -719,7 +719,7 @@ Change I2C client address:
     > set i2c
     setting i2c address to: 0x18
 
-=head2 tled
+=head3 tled
 
 Will fade-in/out red leds and sequentially (1 to 6) blink with both red/blue
 leds to test if all are wired correctly:

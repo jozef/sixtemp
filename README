@@ -15,7 +15,7 @@ DESCRIPTION
     provides the temperature readings via I2C interface and it also shows
     the temperature using 6xred-blue leds.
 
-I2C CLIENT
+ I2C SLAVE device
 
     Connected to I2C, by default, responds on 0x18 address.
 
@@ -33,7 +33,7 @@ I2C CLIENT
                             char address[8];
                         };
 
-SERIAL INTERFACE
+ SERIAL INTERFACE
 
     Using Arduino serial port:
 
@@ -43,7 +43,7 @@ SERIAL INTERFACE
     ^^^ start-up message in case if sensors and configuration was read
     successfully from eeprom.
 
- help/?
+  help/?
 
     Prints version and available commands:
 
@@ -57,7 +57,7 @@ SERIAL INTERFACE
           tled [num]      - do led blink test num times (1 is default)
           help/?          - print this help
 
- info
+  info
 
     Prints version and debug/info:
 
@@ -68,7 +68,7 @@ SERIAL INTERFACE
             i2c_addr: 0x18
             i2c_register: 0x0
 
- temp
+  temp
 
     Prints all available temparature sensor readings:
 
@@ -80,7 +80,7 @@ SERIAL INTERFACE
         sensor 5/6 [28ffa59492160558]: ERROR
         sensor 6/6 [286164122f89682a]: 24.0 C
 
- forget
+  forget
 
     Forget one temperature sensor:
 
@@ -95,7 +95,7 @@ SERIAL INTERFACE
         sensor 5/6 [28ffa59492160558]: ERROR
         sensor 6/6 [286164122f89682a]: 24.0 C
 
-    head2 set i2c
+  set i2c
 
     Change I2C client address:
 
@@ -112,7 +112,7 @@ SERIAL INTERFACE
         > set i2c
         setting i2c address to: 0x18
 
- tled
+  tled
 
     Will fade-in/out red leds and sequentially (1 to 6) blink with both
     red/blue leds to test if all are wired correctly:
