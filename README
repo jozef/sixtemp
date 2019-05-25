@@ -152,7 +152,7 @@ HARDWARE
 
 SEE ALSO
 
-    Client library: https://github.com/jozef/sixtemp_i2c
+    I2C master library: https://github.com/jozef/sixtemp_i2c
 
 TODO
 

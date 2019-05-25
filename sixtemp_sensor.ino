@@ -757,7 +757,7 @@ See L<https://blog.kutej.net/2019/03/sixtemp> for pictures of the hardware.
 
 =head1 SEE ALSO
 
-Client library: L<https://github.com/jozef/sixtemp_i2c>
+I2C master library: L<https://github.com/jozef/sixtemp_i2c>
 
 
 =head1 TODO
